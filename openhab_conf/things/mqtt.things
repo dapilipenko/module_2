@@ -1,0 +1,22 @@
+Bridge mqtt:broker:mosquitto "MQTT Broker" [
+    host="mqtt-broker",
+    port=1883,
+    secure=false,
+    clientID="openhab-gateway"
+]{
+    Thing topic temp "MQTT Temp Sensor" {
+        Channels:
+            Type number : temperature "MQTT Temperature" [ stateTopic="sensors/temp", transformationPattern="JSONPATH:$.temperature" ]
+            Type number : battery "MQTT Battery" [ stateTopic="sensors/temp", transformationPattern="JSONPATH:$.battery" ]
+    }
+    Thing topic humidity "MQTT Humidity Sensor" {
+        Channels:
+            Type number : humidity "MQTT Humidity" [ stateTopic="sensors/humidity", transformationPattern="JSONPATH:$.humidity" ]
+            Type number : battery "MQTT Battery" [ stateTopic="sensors/humidity", transformationPattern="JSONPATH:$.battery" ]
+    }
+    Thing topic lamp "MQTT Lamp" {
+        Channels:
+            Type switch : power "MQTT Lamp Power" [ stateTopic="lights/lamp1/state", commandTopic="lights/lamp1/command", transformationPattern="JSONPATH:$.on", formatBeforePublish="%s" ]
+            Type dimmer : level "MQTT Lamp Level" [ stateTopic="lights/lamp1/state", commandTopic="lights/lamp1/command", transformationPattern="JSONPATH:$.level", formatBeforePublish="%s" ]
+    }
+}

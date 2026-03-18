@@ -1,0 +1,16 @@
+osgi.wiring.package; (&(osgi.wiring.package=com.zsmartsystems.zigbee)(&(version>=1.4.0)(!(version>=2.0.0))))
+303; version=1.4.14
+osgi.wiring.package; (osgi.wiring.package=org.openhab.binding.zigbee.handler)
+311; version=4.3.0
+osgi.wiring.package; (osgi.wiring.package=org.openhab.core.io.console.extensions)
+176; version=4.3.0
+osgi.wiring.package; (&(osgi.wiring.package=com.zsmartsystems.zigbee.zdo.field)(&(version>=1.4.0)(!(version>=2.0.0))))
+303; version=1.4.14
+osgi.wiring.package; (osgi.wiring.package=org.openhab.core.thing)
+221; version=4.3.0
+osgi.wiring.package; (osgi.wiring.package=org.openhab.core.io.console)
+176; version=4.3.0
+osgi.wiring.package; (&(osgi.wiring.package=com.zsmartsystems.zigbee.console)(&(version>=1.4.0)(!(version>=2.0.0))))
+304; version=1.4.14
+osgi.wiring.package; (osgi.wiring.package=org.openhab.core.thing.binding)
+221; version=4.3.0

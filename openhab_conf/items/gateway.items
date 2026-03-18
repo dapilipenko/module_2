@@ -1,0 +1,21 @@
+// MQTT sourced items
+Number:Temperature MQTT_Temperature "MQTT Temperature [%.1f °C]" { channel="mqtt:topic:mosquitto:temp:temperature" }
+Number MQTT_Humidity "MQTT Humidity [%.1f %%]" { channel="mqtt:topic:mosquitto:humidity:humidity" }
+Switch MQTT_LightPower "MQTT Lamp Power" { channel="mqtt:topic:mosquitto:lamp:power" }
+Dimmer MQTT_LightLevel "MQTT Lamp Level [%d %%]" { channel="mqtt:topic:mosquitto:lamp:level" }
+Number MQTT_Battery "MQTT Battery [%d %%]" { channel="mqtt:topic:mosquitto:temp:battery" }
+
+// Zigbee mock sourced items
+Switch Zigbee_Switch "Zigbee Switch" { channel="http:url:zigbee:zb_switch_1" }
+Dimmer Zigbee_Dimmer "Zigbee Dimmer [%d %%]" { channel="http:url:zigbee:zb_dimmer_1" }
+Number:Temperature Zigbee_Temperature "Zigbee Temperature [%.1f °C]" { channel="http:url:zigbee:zb_temp_1" }
+Number Zigbee_Battery "Zigbee Battery [%d %%]" { channel="http:url:zigbee:battery" }
+Number Zigbee_LQI "Zigbee LQI [%d]" { channel="http:url:zigbee:lqi" }
+
+// Unified gateway items
+Number:Temperature Gateway_Temperature "Gateway Temperature [%.1f °C]" { expire="5m, UNDEF" }
+Number Gateway_Humidity "Gateway Humidity [%.1f %%]" { expire="5m, UNDEF" }
+Switch Gateway_Light "Gateway Light" { expire="10m, UNDEF" }
+Dimmer Gateway_Dimmer "Gateway Dimmer [%d %%]" { expire="10m, UNDEF" }
+Number Gateway_Battery "Gateway Battery [%d %%]" { expire="10m, UNDEF" }
+Number Gateway_LQI "Gateway LQI [%d]" { expire="10m, UNDEF" }

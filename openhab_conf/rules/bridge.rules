@@ -1,0 +1,81 @@
+import org.openhab.core.library.types.OnOffType
+
+// Cross-protocol synchronization between MQTT and Zigbee mock
+rule "MQTT temperature -> gateway + zigbee"
+when
+    Item MQTT_Temperature received update
+then
+    Gateway_Temperature.postUpdate(MQTT_Temperature.state)
+    try {
+        val payload = "{\"temperature\": " + MQTT_Temperature.state.toString + "}"
+        sendHttpPutRequest("http://zigbee-mock:3000/devices/zb_temp_1", "application/json", payload)
+    } catch (Exception e) {
+        logWarn("bridge", "Failed to push MQTT temperature to Zigbee: {}", e.getMessage)
+    }
+end
+
+rule "MQTT humidity -> gateway"
+when
+    Item MQTT_Humidity received update
+then
+    Gateway_Humidity.postUpdate(MQTT_Humidity.state)
+end
+
+rule "Zigbee temperature -> gateway + MQTT"
+when
+    Item Zigbee_Temperature received update
+then
+    Gateway_Temperature.postUpdate(Zigbee_Temperature.state)
+    try {
+        val mqttActions = getActions("mqtt", "mqtt:broker:mosquitto")
+        mqttActions.publishMQTT("sensors/temp", "{\"temperature\": " + Zigbee_Temperature.state.toString + "}")
+    } catch (Exception e) {
+        logWarn("bridge", "Failed to publish Zigbee temperature to MQTT: {}", e.getMessage)
+    }
+end
+
+rule "Zigbee switch -> gateway"
+when
+    Item Zigbee_Switch received update
+then
+    Gateway_Light.postUpdate(Zigbee_Switch.state)
+end
+
+rule "MQTT lamp -> gateway"
+when
+    Item MQTT_LightPower received update or
+    Item MQTT_LightLevel received update
+then
+    Gateway_Light.postUpdate(MQTT_LightPower.state)
+    Gateway_Dimmer.postUpdate(MQTT_LightLevel.state)
+end
+
+rule "Gateway light command -> MQTT + Zigbee"
+when
+    Item Gateway_Light received command or
+    Item Gateway_Dimmer received command
+then
+    val power = if (receivedCommand instanceof OnOffType) receivedCommand as OnOffType else Gateway_Light.state as OnOffType
+    val level = if (Gateway_Dimmer.state != NULL && Gateway_Dimmer.state != UNDEF) (Gateway_Dimmer.state as Number).intValue else 0
+    try {
+        val mqttActions = getActions("mqtt", "mqtt:broker:mosquitto")
+        mqttActions.publishMQTT("lights/lamp1/command", "{\"on\": " + (power == ON) + ", \"level\": " + level + "}")
+    } catch (Exception e) {
+        logWarn("bridge", "Failed to publish gateway light command to MQTT: {}", e.getMessage)
+    }
+    try {
+        val payload = "{\"on\": " + (power == ON) + ", \"level\": " + level + "}"
+        sendHttpPutRequest("http://zigbee-mock:3000/devices/zb_dimmer_1", "application/json", payload)
+    } catch (Exception e) {
+        logWarn("bridge", "Failed to push gateway light command to Zigbee mock: {}", e.getMessage)
+    }
+end
+
+rule "Zigbee health metrics -> gateway"
+when
+    Item Zigbee_Battery received update or
+    Item Zigbee_LQI received update
+then
+    Gateway_Battery.postUpdate(Zigbee_Battery.state)
+    Gateway_LQI.postUpdate(Zigbee_LQI.state)
+end

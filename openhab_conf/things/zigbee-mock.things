@@ -1,0 +1,42 @@
+Thing http:url:zigbee "Zigbee Mock Coordinator" [
+    baseURL="http://zigbee-mock:3000",
+    refresh=10,
+    timeout=5000
+]{
+    Channels:
+        Type switch : zb_switch_1 "ZB Switch 1" [
+            stateExtension="/devices/zb_switch_1",
+            commandExtension="/devices/zb_switch_1",
+            mode="READWRITE",
+            method="PUT",
+            contentType="application/json",
+            onValue="{\"on\": true}",
+            offValue="{\"on\": false}",
+            commandTemplate="{\"on\": %s}",
+            stateTransformation="JSONPATH:$.state.on"
+        ]
+        Type dimmer : zb_dimmer_1 "ZB Dimmer 1" [
+            stateExtension="/devices/zb_dimmer_1",
+            commandExtension="/devices/zb_dimmer_1",
+            mode="READWRITE",
+            method="PUT",
+            contentType="application/json",
+            commandTemplate="{\"level\": %s}",
+            stateTransformation="JSONPATH:$.state.level"
+        ]
+        Type number : zb_temp_1 "ZB Temp 1" [
+            stateExtension="/devices/zb_temp_1",
+            mode="READONLY",
+            stateTransformation="JSONPATH:$.state.temperature"
+        ]
+        Type number : battery "ZB Battery" [
+            stateExtension="/devices/zb_switch_1",
+            mode="READONLY",
+            stateTransformation="JSONPATH:$.state.battery"
+        ]
+        Type number : lqi "ZB Link Quality" [
+            stateExtension="/devices/zb_switch_1",
+            mode="READONLY",
+            stateTransformation="JSONPATH:$.state.lqi"
+        ]
+}

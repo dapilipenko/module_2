@@ -1,0 +1,6 @@
+{
+  "http:url:zigbee": {
+    "class": "java.lang.String",
+    "value": ""
+  }
+}
