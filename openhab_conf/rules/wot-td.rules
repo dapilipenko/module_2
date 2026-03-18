@@ -1,0 +1,2 @@
+// WoT TD automation was migrated to openhab_conf/automation/js/wot-td.js
+// so this project no longer depends on the older transform("JS", ...) flow.

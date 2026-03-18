@@ -1,3 +1,9 @@
+// Semantic model groups
+Group gHome "Home" ["Location"]
+Group gGateway "Gateway" (gHome) ["Equipment"]
+Group gEnv "Environment" (gGateway) ["Equipment"]
+Group gActuators "Actuators" (gGateway) ["Equipment"]
+
 // MQTT sourced items
 Number:Temperature MQTT_Temperature "MQTT Temperature [%.1f °C]" { channel="mqtt:topic:mosquitto:temp:temperature" }
 Number MQTT_Humidity "MQTT Humidity [%.1f %%]" { channel="mqtt:topic:mosquitto:humidity:humidity" }
@@ -12,10 +18,59 @@ Number:Temperature Zigbee_Temperature "Zigbee Temperature [%.1f °C]" { channel=
 Number Zigbee_Battery "Zigbee Battery [%d %%]" { channel="http:url:zigbee:battery" }
 Number Zigbee_LQI "Zigbee LQI [%d]" { channel="http:url:zigbee:lqi" }
 
-// Unified gateway items
-Number:Temperature Gateway_Temperature "Gateway Temperature [%.1f °C]" { expire="5m, UNDEF" }
-Number Gateway_Humidity "Gateway Humidity [%.1f %%]" { expire="5m, UNDEF" }
-Switch Gateway_Light "Gateway Light" { expire="10m, UNDEF" }
-Dimmer Gateway_Dimmer "Gateway Dimmer [%d %%]" { expire="10m, UNDEF" }
-Number Gateway_Battery "Gateway Battery [%d %%]" { expire="10m, UNDEF" }
-Number Gateway_LQI "Gateway LQI [%d]" { expire="10m, UNDEF" }
+// Unified gateway items (semantic tags)
+Number:Temperature Gateway_Temperature "Gateway Temperature [%.1f °C]" (gEnv) ["Measurement", "Temperature"] {
+  expire="5m, UNDEF",
+  wot="Property" [ propertyName="temperature", title="Temperature", description="Aggregated ambient temperature from MQTT and Zigbee sources", schemaType="number", unit="degree Celsius", readOnly="true", observable="true", eventName="temperatureChanged", eventTitle="Temperature Changed", eventDescription="Temperature state change stream", eventDataType="number", eventUnit="degree Celsius", semanticTypes="sosa:ObservableProperty,sosa:Temperature" ],
+  sosa="sosa:ObservableProperty,sosa:Temperature",
+  iot="GatewayPoint" [ capability="temperature", location="home" ],
+  interop="ProtocolHints" [ matterCluster="TemperatureMeasurement", ocfResourceType="oic.r.temperature", oneM2MResource="m2m:cin" ]
+}
+Number Gateway_Humidity "Gateway Humidity [%.1f %%]" (gEnv) ["Measurement", "Humidity"] {
+  expire="5m, UNDEF",
+  wot="Property" [ propertyName="humidity", title="Humidity", description="Gateway-relative humidity observed from MQTT sensors", schemaType="number", unit="percent", readOnly="true", observable="true", eventName="humidityChanged", eventTitle="Humidity Changed", eventDescription="Humidity state change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:ObservableProperty,sosa:Humidity" ],
+  sosa="sosa:ObservableProperty,sosa:Humidity",
+  iot="GatewayPoint" [ capability="humidity", location="home" ],
+  interop="ProtocolHints" [ matterCluster="RelativeHumidityMeasurement", ocfResourceType="oic.r.humidity", oneM2MResource="m2m:cin" ]
+}
+Switch Gateway_Light "Gateway Light" (gActuators) ["Light", "Switch"] {
+  expire="10m, UNDEF",
+  wot="Property" [ propertyName="light", title="Light", description="Binary lighting actuator state aggregated by the gateway", schemaType="boolean", readOnly="false", observable="true", propertyOps="readproperty,writeproperty", actionName="setLight", actionTitle="Set Light", actionDescription="Toggle the gateway light state", actionInputType="boolean", actionSemanticTypes="sosa:Actuator", eventName="lightChanged", eventTitle="Light Changed", eventDescription="Light state change stream", eventDataType="boolean", semanticTypes="sosa:Actuator" ],
+  sosa="sosa:Actuator",
+  iot="GatewayPoint" [ capability="light", location="home" ],
+  interop="ProtocolHints" [ matterCluster="OnOff", ocfResourceType="oic.r.switch.binary", oneM2MResource="m2m:actr" ]
+}
+Dimmer Gateway_Dimmer "Gateway Dimmer [%d %%]" (gActuators) ["Light", "Dimmer"] {
+  expire="10m, UNDEF",
+  wot="Property" [ propertyName="dimmer", title="Dimmer", description="Lighting dimmer percentage controlled through the gateway", schemaType="number", unit="percent", readOnly="false", observable="true", propertyOps="readproperty,writeproperty", actionName="setDimmer", actionTitle="Set Dimmer", actionDescription="Set light brightness", actionInputType="number", actionMinimum="0", actionMaximum="100", actionSemanticTypes="sosa:Actuator", eventName="dimmerChanged", eventTitle="Dimmer Changed", eventDescription="Dimmer level change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:Actuator" ],
+  sosa="sosa:Actuator",
+  iot="GatewayPoint" [ capability="dimming", location="home" ],
+  interop="ProtocolHints" [ matterCluster="LevelControl", ocfResourceType="oic.r.light.dimming", oneM2MResource="m2m:actr" ]
+}
+Number Gateway_Battery "Gateway Battery [%d %%]" (gGateway) ["Measurement"] {
+  expire="10m, UNDEF",
+  wot="Property" [ propertyName="battery", title="Battery", description="Battery level of the Zigbee edge device", schemaType="number", unit="percent", readOnly="true", observable="true", eventName="batteryChanged", eventTitle="Battery Changed", eventDescription="Battery level change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:ObservableProperty" ],
+  sosa="sosa:ObservableProperty",
+  iot="GatewayPoint" [ capability="battery", location="home" ],
+  interop="ProtocolHints" [ matterCluster="PowerSource", ocfResourceType="oic.r.energy.consumption", oneM2MResource="m2m:cin" ]
+}
+Number Gateway_LQI "Gateway LQI [%d]" (gGateway) ["Measurement"] {
+  expire="10m, UNDEF",
+  wot="Property" [ propertyName="lqi", title="Link Quality", description="Zigbee link quality indicator exposed by the gateway", schemaType="number", unit="rssi", readOnly="true", observable="true", eventName="linkQualityChanged", eventTitle="Link Quality Changed", eventDescription="LQI change stream", eventDataType="number", eventUnit="rssi", semanticTypes="sosa:ObservableProperty" ],
+  sosa="sosa:ObservableProperty",
+  iot="GatewayPoint" [ capability="linkquality", location="home" ],
+  interop="ProtocolHints" [ matterCluster="NetworkCommissioning", ocfResourceType="oic.r.signal-strength", oneM2MResource="m2m:cin" ]
+}
+
+// WoT TD exposure items
+String TD_Gateway_JSONLD "WoT TD (JSON-LD)"
+String TD_Gateway_JSON "WoT TD (JSON)"
+String TD_Context_JSONLD "WoT Context (JSON-LD)"
+String TD_Directory "WoT TD Directory" {
+  wot="Directory" [ thingId="urn:openhab:thing:gateway", thingTitle="OpenHAB Gateway", thingDescription="Semantically annotated IoT gateway that exposes MQTT and Zigbee capabilities as W3C WoT Thing Descriptions", thingTypes="iot:Gateway,sosa:Platform", profile="http://www.w3.org/ns/td", securityName="nosec_sc", securityScheme="nosec", contextItem="TD_Context_JSONLD" ],
+  iot="DirectoryConfig" [ baseUrl="http://localhost:8080", location="home" ]
+}
+String TD_Directory_Query "TD Search Query"
+String TD_Directory_Result "TD Search Result"
+String TD_Validation_Status "TD Validation [%s]"
+String TD_Validation_Report "TD Validation Report"
