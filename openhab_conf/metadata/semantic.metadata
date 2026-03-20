@@ -1,0 +1,54 @@
+// Semantic metadata for WoT + SSN/SOSA annotations
+Gateway_Temperature {
+  wot="Property"
+  wot=[ propertyName="temperature", title="Temperature", description="Aggregated ambient temperature from MQTT and Zigbee sources", schemaType="number", unit="degree Celsius", readOnly="true", observable="true", eventName="temperatureChanged", eventTitle="Temperature Changed", eventDescription="Temperature state change stream", eventDataType="number", eventUnit="degree Celsius", semanticTypes="sosa:ObservableProperty,sosa:Temperature" ]
+  sosa="sosa:ObservableProperty,sosa:Temperature"
+  iot=[ capability="temperature", location="home" ]
+  interop=[ matterCluster="TemperatureMeasurement", ocfResourceType="oic.r.temperature", oneM2MResource="m2m:cin" ]
+}
+
+Gateway_Humidity {
+  wot="Property"
+  wot=[ propertyName="humidity", title="Humidity", description="Gateway-relative humidity observed from MQTT sensors", schemaType="number", unit="percent", readOnly="true", observable="true", eventName="humidityChanged", eventTitle="Humidity Changed", eventDescription="Humidity state change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:ObservableProperty,sosa:Humidity" ]
+  sosa="sosa:ObservableProperty,sosa:Humidity"
+  iot=[ capability="humidity", location="home" ]
+  interop=[ matterCluster="RelativeHumidityMeasurement", ocfResourceType="oic.r.humidity", oneM2MResource="m2m:cin" ]
+}
+
+Gateway_Battery {
+  wot="Property"
+  wot=[ propertyName="battery", title="Battery", description="Battery level of the Zigbee edge device", schemaType="number", unit="percent", readOnly="true", observable="true", eventName="batteryChanged", eventTitle="Battery Changed", eventDescription="Battery level change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:ObservableProperty" ]
+  sosa="sosa:ObservableProperty"
+  iot=[ capability="battery", location="home" ]
+  interop=[ matterCluster="PowerSource", ocfResourceType="oic.r.energy.consumption", oneM2MResource="m2m:cin" ]
+}
+
+Gateway_LQI {
+  wot="Property"
+  wot=[ propertyName="lqi", title="Link Quality", description="Zigbee link quality indicator exposed by the gateway", schemaType="number", unit="rssi", readOnly="true", observable="true", eventName="linkQualityChanged", eventTitle="Link Quality Changed", eventDescription="LQI change stream", eventDataType="number", eventUnit="rssi", semanticTypes="sosa:ObservableProperty" ]
+  sosa="sosa:ObservableProperty"
+  iot=[ capability="linkquality", location="home" ]
+  interop=[ matterCluster="NetworkCommissioning", ocfResourceType="oic.r.signal-strength", oneM2MResource="m2m:cin" ]
+}
+
+Gateway_Light {
+  wot="Property"
+  wot=[ propertyName="light", title="Light", description="Binary lighting actuator state aggregated by the gateway", schemaType="boolean", readOnly="false", observable="true", propertyOps="readproperty,writeproperty", actionName="setLight", actionTitle="Set Light", actionDescription="Toggle the gateway light state", actionInputType="boolean", actionSemanticTypes="sosa:Actuator", eventName="lightChanged", eventTitle="Light Changed", eventDescription="Light state change stream", eventDataType="boolean", semanticTypes="sosa:Actuator" ]
+  sosa="sosa:Actuator"
+  iot=[ capability="light", location="home" ]
+  interop=[ matterCluster="OnOff", ocfResourceType="oic.r.switch.binary", oneM2MResource="m2m:actr" ]
+}
+
+Gateway_Dimmer {
+  wot="Property"
+  wot=[ propertyName="dimmer", title="Dimmer", description="Lighting dimmer percentage controlled through the gateway", schemaType="number", unit="percent", readOnly="false", observable="true", propertyOps="readproperty,writeproperty", actionName="setDimmer", actionTitle="Set Dimmer", actionDescription="Set light brightness", actionInputType="number", actionMinimum="0", actionMaximum="100", actionSemanticTypes="sosa:Actuator", eventName="dimmerChanged", eventTitle="Dimmer Changed", eventDescription="Dimmer level change stream", eventDataType="number", eventUnit="percent", semanticTypes="sosa:Actuator" ]
+  sosa="sosa:Actuator"
+  iot=[ capability="dimming", location="home" ]
+  interop=[ matterCluster="LevelControl", ocfResourceType="oic.r.light.dimming", oneM2MResource="m2m:actr" ]
+}
+
+TD_Directory {
+  wot="Directory"
+  wot=[ thingId="urn:openhab:thing:gateway", thingTitle="OpenHAB Gateway", thingDescription="Semantically annotated IoT gateway that exposes MQTT and Zigbee capabilities as W3C WoT Thing Descriptions", thingTypes="iot:Gateway,sosa:Platform", profile="http://www.w3.org/ns/td", securityName="nosec_sc", securityScheme="nosec", contextItem="TD_Context_JSONLD" ]
+  iot=[ baseUrl="http://localhost:8080", location="home" ]
+}

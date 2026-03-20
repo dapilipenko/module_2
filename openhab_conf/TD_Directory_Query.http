@@ -1,0 +1,13 @@
+POST http://localhost:8080/rest/items/TD_Directory_Query
+Content-Type: text/plain
+
+{"capability":"light"}
+
+
+###
+GET http://localhost:8080/rest/items/TD_Directory_Result
+Accept: application/json
+
+###
+GET http://localhost:8080/rest/items/TD_Gateway_JSONLD
+Accept: application/json
