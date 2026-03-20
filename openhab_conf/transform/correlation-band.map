@@ -1,0 +1,11 @@
+﻿VERY_STRONG_POSITIVE=Very strong positive
+STRONG_POSITIVE=Strong positive
+MODERATE_POSITIVE=Moderate positive
+WEAK_POSITIVE=Weak positive
+NEUTRAL=Weak or neutral
+WEAK_NEGATIVE=Weak negative
+MODERATE_NEGATIVE=Moderate negative
+STRONG_NEGATIVE=Strong negative
+VERY_STRONG_NEGATIVE=Very strong negative
+INSUFFICIENT_DATA=Collecting samples
+-=Unknown

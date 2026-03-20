@@ -1,6 +1,4 @@
-version: "3.9"
-
-services:
+﻿services:
   mqtt-broker:
     image: eclipse-mosquitto:2.0
     container_name: mqtt-broker
@@ -42,14 +40,14 @@ services:
       - ./mqtt-explorer-data:/data
     restart: unless-stopped
 
-  zigbee-mock:
-    build: ./zigbee-mock
-    container_name: zigbee-mock
-    ports:
-      - "3000:3000"
-    networks:
-      - iot-net
-    restart: unless-stopped
+  # zigbee-mock:
+  #   build: ./zigbee-mock
+  #   container_name: zigbee-mock
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - iot-net
+  #   restart: unless-stopped
 
   openhab:
     image: openhab/openhab:4.3.0-debian
@@ -59,13 +57,12 @@ services:
       - "8443:8443"
     depends_on:
       - mqtt-broker
-      - zigbee-mock
     networks:
       - iot-net
     volumes:
-      - ./openhab_conf:/openhab/conf
+      - ./openhab/conf:/openhab/conf
       - ./openhab-data/userdata:/openhab/userdata
-      - ./openhab-data/addons:/openhab/addons
+      - ./openhab/addons:/openhab/addons
     environment:
       - OPENHAB_HTTP_PORT=8080
       - OPENHAB_HTTPS_PORT=8443
@@ -75,4 +72,6 @@ services:
 networks:
   iot-net:
     driver: bridge
+
+
 

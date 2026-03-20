@@ -1,0 +1,8 @@
+﻿UP=Rising
+DOWN=Falling
+STABLE=Stable
+SHIFT_UP=Upward change detected
+SHIFT_DOWN=Downward change detected
+NO_CHANGE=No change point
+INSUFFICIENT_DATA=Collecting samples
+-=Unknown

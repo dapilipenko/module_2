@@ -1,0 +1,9 @@
+Strategies {
+  everyMinute : "0 * * * * ?"
+  everyFiveMinutes : "0 0/5 * * * ?"
+  default = everyChange
+}
+
+Items {
+  gRrd* : strategy = everyChange, everyMinute
+}

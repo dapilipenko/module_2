@@ -1,288 +1,161 @@
-## Semantic IoT Gateway with OpenHAB 4.3
+﻿# OpenHAB Variant 3 - Multi-Sensor Analytics
 
-Цей репозиторій реалізує семантично анотовану IoT систему на базі OpenHAB 4.3.0,
-яка об'єднує MQTT та Zigbee-mock пристрої в один gateway і автоматично генерує
-W3C Web of Things Thing Description, TD Directory, JSON-LD context та validation
-artifacts.
+This repository implements Variant 3: Multi-Sensor Analytics. The goal is to build an analytical system for 5+ virtual sensors with correlation analysis and trend detection in OpenHAB.
+The configuration simulates seven virtual sensors, stores history with rrd4j and mapdb, computes rolling statistics and cross-sensor correlation, and exposes the results in a sitemap called analytics.
 
-## Обов'язкові дослідження
+## Task summary
 
-1. **W3C WoT Thing Description**
-   TD використовується як машинно-читаний опис Things, де OpenHAB Items
-   відображаються у `properties`, `actions`, `events`, `forms`, `security` та
-   `links`.
-2. **JSON-LD**
-   JSON-LD використано для семантичних анотацій TD через `@context`, кастомний
-   vocabulary та URI-based терміни.
-3. **SSN/SOSA Ontology**
-   Семантика сенсорів та актуаторів моделюється через `sosa:ObservableProperty`,
-   `sosa:Temperature`, `sosa:Humidity`, `sosa:Actuator`.
-4. **OpenHAB Metadata**
-   Семантичний шар побудовано через metadata namespaces `wot`, `sosa`, `iot`,
-   `interop`; TD generator читає саме metadata, а не захардкоджені affordances.
-5. **Matter, OCF, oneM2M**
-   Для кожного gateway item додано protocol hints (`matterCluster`,
-   `ocfResourceType`, `oneM2MResource`) як частину custom semantic annotations.
+Implement an analytics pipeline for virtual sensors with:
 
-## Архітектура
+- Virtual sensors (5+ types) with realistic simulated data patterns, noise, and seasonal variations.
+- Data correlation analysis, including a correlation matrix, lead-lag detection, and causality hints.
+- Statistical computations in rules: SMA, EMA, standard deviation, min/max, and percentile metrics.
+- Trend detection: linear regression slope, trend direction, change-point detection, and forecasting.
+- OpenHAB items for sensors and calculated results, persistence for history, MAP transforms, and a sitemap with charts.
 
-```mermaid
-flowchart LR
-    subgraph Devices
-        MQTT[MQTT sensors and lamp]
-        ZB[Zigbee mock via HTTP]
-    end
+## How the requirements are met
 
-    subgraph OpenHAB
-        Bindings[MQTT + HTTP bindings]
-        Items[Semantic Items]
-        Metadata[OpenHAB Metadata]
-        Rules[Rules DSL bridge]
-        TDGen[JS Scripting TD Generator]
-    end
+### 1) Virtual sensors (5+ types)
 
-    subgraph WoT Layer
-        Context[JSON-LD Context]
-        TDLD[Thing Description JSON-LD]
-        TDJSON[Thing Description JSON]
-        Directory[TD Directory]
-        Validation[TD Validation Report]
-    end
+Seven sensors are simulated every minute with seasonal and daily patterns plus noise:
 
-    MQTT --> Bindings
-    ZB --> Bindings
-    Bindings --> Items
-    Items --> Rules
-    Items --> Metadata
-    Metadata --> TDGen
-    Rules --> Items
-    TDGen --> Context
-    TDGen --> TDLD
-    TDGen --> TDJSON
-    TDGen --> Directory
-    TDGen --> Validation
+- Outdoor/Indoor Temperature
+- Outdoor/Indoor Humidity
+- Barometric Pressure
+- CO2
+- Daylight
+
+### 2) Data correlation analysis
+
+- Pearson correlation for key sensor pairs.
+- Full correlation matrix rendered as text rows.
+- Lead-lag analysis with a best-lag selection.
+- Heuristic causality text based on lag-improvement vs zero-lag baseline.
+
+### 3) Statistical computations in rules
+
+- SMA(15), EMA(30), StdDev(30), Min/Max(60).
+- Percentiles: P90 for outdoor temperature, P95 for CO2.
+
+### 4) Trend detection
+
+- Linear regression slope over recent samples.
+- Trend direction (up/down/stable) classification.
+- Change-point detection on a rolling window.
+- Forecast +60 minutes with linear extrapolation.
+
+### 5) OpenHAB configuration artifacts
+
+- Items for sensors and computed metrics.
+- JS rules for simulation and analytics.
+- Persistence (rrd4j + mapdb) for charts and restart restore.
+- MAP transforms for human-friendly labels.
+- Sitemap with charts and analytics widgets.
+
+## Architecture: Base OpenHAB configuration
+
+```
+openhab/
+├── conf/
+│ ├── persistence/ # Persistence strategies
+│ ├── items/ # Items with metadata
+│ ├── rules/ # Analytics rules
+│ └── sitemaps/ # Charts
+└── addons/
+   └── persistence/ # InfluxDB, rrd4j, JDBC
 ```
 
-## Standards Mapping
+## Repository layout
 
-| Standard | How it is used in the project |
-| --- | --- |
-| WoT TD | Generates `properties`, `actions`, `events`, `forms`, `securityDefinitions`, `links` |
-| JSON-LD | Adds `@context`, linked vocabulary, URI-based terms |
-| SSN/SOSA | Describes sensors and actuators semantically |
-| OpenHAB Semantic Model | Uses semantic tags and equipment/location grouping |
-| OpenHAB Metadata | Stores TD mapping, capabilities, locations and interop hints |
-| Matter | Mapped through metadata such as `OnOff`, `LevelControl`, `TemperatureMeasurement` |
-| OCF | Mapped through `oic.r.*` resource types |
-| oneM2M | Mapped through `m2m:*` resource hints |
+- openhab/conf/items/analytics.items
+- openhab/conf/automation/js/virtual-sensor-simulation.js
+- openhab/conf/automation/js/multi-sensor-analytics.js
+- openhab/conf/persistence/mapdb.persist
+- openhab/conf/persistence/rrd4j.persist
+- openhab/conf/services/addons.cfg
+- openhab/conf/services/basicui.cfg
+- openhab/conf/services/persistence.cfg
+- openhab/conf/services/rrd4j.cfg
+- openhab/conf/services/runtime.cfg
+- openhab/conf/transform/correlation-band.map
+- openhab/conf/transform/trend.map
+- openhab/conf/sitemaps/analytics.sitemap
+- openhab/addons/persistence/README.md
+- docs/analytics-results.md
 
-## Repository Structure
+## Sensor specifications
 
-```text
-openhab_conf/
-├── automation/js/wot-td.js
-├── items/gateway.items
-├── metadata/semantic.metadata
-├── persistence/mapdb.persist
-├── rules/bridge.rules
-├── rules/wot-td.rules
-├── services/addons.cfg
-├── sitemaps/gateway.sitemap
-├── things/mqtt.things
-├── things/zigbee-mock.things
-└── transform/
-    ├── iot-gateway-context.jsonld
-    ├── wot-td.js
-    ├── wot-td-plain.js
-    └── wot-td-directory-filter.js
-```
+1. Outdoor Temperature
+   Seasonal baseline, day-night sine wave, pressure coupling, and deterministic noise.
+2. Indoor Temperature
+   Lagged outdoor temperature, occupancy heat gain, and smaller stochastic variation.
+3. Outdoor Humidity
+   Inverse relation to outdoor temperature, pressure influence, and cloud-driven variability.
+4. Indoor Humidity
+   Lagged outdoor humidity, indoor temperature dependence, and occupancy moisture effect.
+5. Barometric Pressure
+   Slow weather-front oscillation with seasonal drift.
+6. CO2
+   Occupancy-driven indoor air-quality indicator with humidity and temperature coupling.
+7. Daylight
+   Seasonal sunrise-sunset envelope with cloud attenuation.
 
-## Базова конфігурація OpenHAB
+## Statistical algorithms
 
-- `OpenHAB 4.3.0`
-- `MQTT binding`
-- `HTTP binding`
-- `JS Scripting automation`
-- `JSONPATH transformation`
-- Semantic Model через `items` tags/groups
-- Semantic metadata через `openhab_conf/metadata/semantic.metadata`
+- SMA over the latest 15 samples.
+- EMA over the latest 30 samples.
+- Standard deviation over the latest 30 samples.
+- Min and Max over the latest 60 samples.
+- Percentile P90 for outdoor temperature and P95 for CO2.
+- Pearson correlation for key sensor pairs and the full correlation matrix.
+- Lead-lag search over plus or minus 8 samples.
+- Heuristic causality score from lagged-correlation improvement.
+- Linear regression slope over the latest 45 samples.
+- Trend direction classification into UP, DOWN, or STABLE.
+- Change point detection from the last 20 samples.
+- Forecasting by linear extrapolation 60 minutes ahead.
 
-`addons.cfg`:
+## Correlation matrix example
 
-```cfg
-automation = jsscripting
-transformation = jsonpath
-```
+A sample matrix and interpretation are documented in docs/analytics-results.md.
+Typical relations in this model are:
 
-Примітка: у цьому проєкті TD generation реалізований через file-based `JS Scripting`,
-бо саме такий варіант стабільно працює в OpenHAB 4.3. Legacy JS transform scripts
-залишено у `openhab_conf/transform/` як референсні артефакти.
+- Outdoor temperature and indoor temperature: strong positive correlation.
+- Outdoor temperature and outdoor humidity: strong negative correlation.
+- Barometric pressure and outdoor humidity: moderate negative correlation.
+- Daylight and outdoor temperature: positive relation with a short lead-lag delay.
+- CO2 and indoor humidity: positive relation driven by occupancy.
 
-## IoT Gateway Scenario
+## Trend analysis results
 
-- MQTT симулює температуру, вологість і стан лампи.
-- Zigbee mock надає HTTP API для switch, dimmer, temperature, battery, LQI.
-- `bridge.rules` синхронізує MQTT, Zigbee та уніфіковані `Gateway_*` items.
-- `wot-td.js` перетворює metadata-driven модель в WoT TD artifacts.
+Expected dashboard outputs include:
 
-## TD Generation Algorithm
+- Outdoor temperature trend direction and 60-minute forecast.
+- Barometric pressure trend direction and 60-minute forecast.
+- Change-point indicators for temperature and pressure.
+- Rolling averages and percentile values for the simulated sensors.
+- Lead-lag and causality text for the outdoor-indoor temperature pair and daylight-temperature pair.
 
-1. JS rule читає Thing-level metadata з item `TD_Directory`.
-2. Rule знаходить усі `Gateway_*` items з namespace `wot="Property"`.
-3. Для кожного item зчитуються:
-   - TD mapping з namespace `wot`
-   - semantic type з namespace `sosa`
-   - capability/location з namespace `iot`
-   - Matter/OCF/oneM2M hints з namespace `interop`
-4. Generator створює:
-   - `TD_Gateway_JSONLD`
-   - `TD_Gateway_JSON`
-   - `TD_Context_JSONLD`
-   - `TD_Directory`
-   - `TD_Validation_Status`
-   - `TD_Validation_Report`
-5. Directory search виконується через item `TD_Directory_Query`.
-6. Validation перевіряє коректність базових TD полів, forms та discovery links.
+## OpenHAB configuration notes
 
-## API Documentation
+- docker-compose.yaml already mounts openhab/conf and openhab/addons, so the new structure is active without further path changes.
+- JS Scripting is enabled through addons.cfg.
+- rrd4j is the default persistence backend for history charts.
+- mapdb restores calculated states on restart.
+- MAP transforms render trend and correlation band labels in the sitemap.
+- The analytics rule keeps rolling windows in memory and fills the charts as persisted history accumulates.
 
-### Core OpenHAB Endpoints
+## Running the stack
 
-- `GET /rest/items/Gateway_Temperature/state`
-- `GET /rest/items/Gateway_Humidity/state`
-- `GET /rest/items/Gateway_Light/state`
-- `POST /rest/items/Gateway_Light`
-- `GET /rest/items/Gateway_Dimmer/state`
-- `POST /rest/items/Gateway_Dimmer`
+1. Start the services with docker compose up -d --build.
+2. Open OpenHAB at http://localhost:8080.
+3. Open the sitemap named analytics.
+4. Wait for the first minute of simulated data and the rolling analytics warm-up.
+5. Review the charts, pairwise correlation values, matrix rows, trend flags, and forecasts.
 
-### WoT Artifact Endpoints
+## Files to submit
 
-- `GET /rest/items/TD_Gateway_JSONLD/state`  
-  Thing Description in JSON-LD form
-- `GET /rest/items/TD_Gateway_JSON/state`  
-  Thing Description in plain JSON form
-- `GET /rest/items/TD_Context_JSONLD/state`  
-  Custom JSON-LD context
-- `GET /rest/items/TD_Directory/state`  
-  TD Directory entry list
-- `GET /rest/items/TD_Validation_Status/state`  
-  `VALID` or `INVALID`
-- `GET /rest/items/TD_Validation_Report/state`  
-  Validation report as JSON
-
-### Discovery / Search API
-
-- `POST /rest/items/TD_Directory_Query`
-- `PUT /rest/items/TD_Directory_Query/state`
-- `GET /rest/items/TD_Directory_Result/state`
-
-Example query:
-
-```json
-{"type":"Gateway","location":"home","capability":"light","validated":true}
-```
-
-## Example Thing Description
-
-```json
-{
-  "@context": [
-    "https://www.w3.org/2019/wot/td/v1",
-    "https://www.w3.org/ns/ssn/",
-    "https://www.w3.org/ns/sosa/",
-    "http://localhost:8080/rest/items/TD_Context_JSONLD/state"
-  ],
-  "id": "urn:openhab:thing:gateway",
-  "title": "OpenHAB Gateway",
-  "@type": ["iot:Gateway", "sosa:Platform"],
-  "properties": {
-    "temperature": {
-      "type": "number",
-      "readOnly": true,
-      "observable": true,
-      "@type": ["sosa:ObservableProperty", "sosa:Temperature"]
-    },
-    "light": {
-      "type": "boolean",
-      "readOnly": false,
-      "observable": true,
-      "@type": ["sosa:Actuator"]
-    }
-  },
-  "actions": {
-    "setLight": {
-      "input": { "type": "boolean" }
-    }
-  },
-  "events": {
-    "temperatureChanged": {
-      "data": { "type": "number", "unit": "degree Celsius" }
-    }
-  }
-}
-```
-
-## Example Directory Entry
-
-```json
-[
-  {
-    "id": "urn:openhab:thing:gateway",
-    "title": "OpenHAB Gateway",
-    "types": ["iot:Gateway", "sosa:Platform"],
-    "location": "home",
-    "capabilities": ["temperature", "humidity", "battery", "linkquality", "light", "dimming"],
-    "validationStatus": "VALID",
-    "validated": true
-  }
-]
-```
-
-## Semantic Metadata Example
-
-```text
-Gateway_Light {
-  wot="Property"
-  wot=[ propertyName="light", actionName="setLight", actionInputType="boolean" ]
-  sosa="sosa:Actuator"
-  iot=[ capability="light", location="home" ]
-  interop=[ matterCluster="OnOff", ocfResourceType="oic.r.switch.binary", oneM2MResource="m2m:actr" ]
-}
-```
-
-## Demo / Verification Steps
-
-1. Run the stack: `docker compose up -d --build`
-2. Open OpenHAB: `http://localhost:8080`
-3. Check sitemap `gateway`
-4. Verify bridge updates:
-   - `Gateway_Temperature`
-   - `Gateway_Humidity`
-   - `Gateway_Light`
-   - `Gateway_Dimmer`
-5. Open artifact endpoints:
-   - `/rest/items/TD_Gateway_JSONLD/state`
-   - `/rest/items/TD_Gateway_JSON/state`
-   - `/rest/items/TD_Directory/state`
-   - `/rest/items/TD_Validation_Report/state`
-6. Submit a query to `TD_Directory_Query`
-7. Verify `TD_Directory_Result`
-
-## Files to Submit
-
-- GitHub repository with the whole project
-- OpenHAB configuration under `openhab_conf/`
-- TD generation script: `openhab_conf/automation/js/wot-td.js`
-- JSON-LD context: `openhab_conf/transform/iot-gateway-context.jsonld`
-- API endpoint definitions documented in this README
-- Architecture diagram in this README
-- Example TD and Directory output in this README
-
-## Manual Deliverable Still Needed
-
-- Demo video `1-3 хв`, де показано:
-  - запуск стеку
-  - оновлення `Gateway_*` items
-  - генерацію `TD_Gateway_JSONLD`
-  - discovery через `TD_Directory_Query`
-  - validation status/report
+- Sensor simulation rules: openhab/conf/automation/js/virtual-sensor-simulation.js
+- Analytics rules: openhab/conf/automation/js/multi-sensor-analytics.js
+- Chart configuration: openhab/conf/sitemaps/analytics.sitemap
+- Results documentation: docs/analytics-results.md
