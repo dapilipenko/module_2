@@ -1,0 +1,109 @@
+2026-03-23 16:10:05.707 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_PMV' changed from NULL to 0.00
+2026-03-23 16:10:05.712 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_ComfortIndex' changed from NULL to 100.0
+2026-03-23 16:10:05.718 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_TempDeviation' changed from NULL to 0.0
+2026-03-23 16:10:05.723 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_PMV' changed from NULL to 0.00
+2026-03-23 16:10:05.730 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_ComfortIndex' changed from NULL to 100.0
+2026-03-23 16:10:05.733 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_TempDeviation' changed from NULL to 0.0
+2026-03-23 16:10:05.735 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_PMV' changed from NULL to 0.00
+2026-03-23 16:10:05.736 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_ComfortIndex' changed from NULL to 100.0
+2026-03-23 16:10:05.738 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_TempDeviation' changed from NULL to 0.0
+2026-03-23 16:10:05.739 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_PMV' changed from NULL to 0.00
+2026-03-23 16:10:05.740 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_ComfortIndex' changed from NULL to 100.0
+2026-03-23 16:10:05.741 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_TempDeviation' changed from NULL to 2.0
+2026-03-23 16:10:05.742 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ComfortScore' changed from NULL to 80.0
+2026-03-23 16:10:05.743 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ComfortLevel' changed from NULL to GOOD
+2026-03-23 16:10:05.744 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_HumidityComfort' changed from NULL to 100
+2026-03-23 16:10:05.751 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalEnergy_kWh' changed from NULL to 0.0
+2026-03-23 16:10:05.754 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EUI' changed from NULL to 0.0
+2026-03-23 16:10:05.756 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_kWhPerM2' changed from NULL to 0.0000
+2026-03-23 16:10:05.787 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EfficiencyScore' changed from NULL to 100.0
+2026-03-23 16:10:05.789 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_BenchmarkEUI' changed from NULL to 220
+2026-03-23 16:10:05.790 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EfficiencyRating' changed from NULL to A
+2026-03-23 16:10:05.793 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Suggestion' changed from NULL to Building meets energy efficiency target – maintain current strategy
+2026-03-23 16:10:05.808 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_HVAC_Share' changed from NULL to 0.0
+2026-03-23 16:10:05.809 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Server_Share' changed from NULL to 0.0
+2026-03-23 16:10:05.811 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalOccupancy' changed from NULL to 0
+2026-03-23 16:10:05.813 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OccupancyStatus' changed from NULL to UNOCCUPIED
+2026-03-23 16:10:05.814 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_HVAC_Setpoint' changed from NULL to 22 °C
+2026-03-23 16:10:05.814 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OccupancyPred' changed from NULL to 33.0
+2026-03-23 16:10:05.815 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_HVAC_Mode' changed from NULL to OFF
+2026-03-23 16:10:05.818 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_PeakTime' changed from NULL to --:--
+2026-03-23 16:10:05.819 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_PeakOccupancy' changed from NULL to 0
+2026-03-23 16:10:05.822 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OccupancyTrend' changed from NULL to 0.0
+2026-03-23 16:10:05.824 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ActiveZones' changed from NULL to 0
+2026-03-23 16:10:05.834 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_HVAC_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.835 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ZonePattern' changed from NULL to Building unoccupied
+2026-03-23 16:10:05.837 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_Lighting_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.839 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_Equip_Power' changed from NULL to 1800 W
+2026-03-23 16:10:05.840 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_HVAC_Setpoint' changed from NULL to 25 °C
+2026-03-23 16:10:05.842 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_HVAC_Mode' changed from NULL to HEAT
+2026-03-23 16:10:05.843 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_HVAC_Power' changed from NULL to 3300 W
+2026-03-23 16:10:05.844 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_Lighting_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.845 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_Equip_Power' changed from NULL to 300 W
+2026-03-23 16:10:05.845 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_HVAC_Setpoint' changed from NULL to 20 °C
+2026-03-23 16:10:05.846 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_HVAC_Mode' changed from NULL to OFF
+2026-03-23 16:10:05.852 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_HVAC_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.854 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_Lighting_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.855 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_Equip_Power' changed from NULL to 640 W
+2026-03-23 16:10:05.856 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_HVAC_Setpoint' changed from NULL to 20 °C
+2026-03-23 16:10:05.859 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_HVAC_Mode' changed from NULL to FAN
+2026-03-23 16:10:05.865 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_HVAC_Power' changed from NULL to 90 W
+2026-03-23 16:10:05.868 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_Lighting_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.870 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_Equip_Power' changed from NULL to 5400 W
+2026-03-23 16:10:05.873 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalHVAC_Power' changed from NULL to 3390 W
+2026-03-23 16:10:05.876 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalLight_Power' changed from NULL to 0 W
+2026-03-23 16:10:05.877 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalEquip_Power' changed from NULL to 8140 W
+2026-03-23 16:10:05.878 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalPower' changed from NULL to 11530 W
+2026-03-23 16:10:05.900 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_TempDeviation' changed from 0.0 to -3.0
+2026-03-23 16:10:05.919 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_TempDeviation' changed from 0.0 to 2.0
+2026-03-23 16:10:05.935 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EUI' changed from 0.0 to 348.3
+2026-03-23 16:10:05.939 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EfficiencyScore' changed from 100.0 to 17.0
+2026-03-23 16:10:05.941 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EfficiencyRating' changed from A to E
+2026-03-23 16:10:05.944 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Suggestion' changed from Building meets energy efficiency target – maintain current strategy to Consider LED upgrade and smart occupancy-based HVAC
+2026-03-23 16:10:05.949 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_HVAC_Share' changed from 0.0 to 29.4
+2026-03-23 16:10:05.956 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Server_Share' changed from 0.0 to 46.8
+2026-03-23 16:10:05.966 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OutdoorTemp' changed from NULL to 13.1 °C
+2026-03-23 16:10:05.968 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OutdoorHumidity' changed from NULL to 72.8
+2026-03-23 16:10:05.982 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_Temperature' changed from NULL to 29 °C
+2026-03-23 16:10:05.992 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_Humidity' changed from NULL to 82.8
+2026-03-23 16:10:05.994 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_CO2' changed from NULL to 2000.0
+2026-03-23 16:10:05.995 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_OccupancyCount' changed from NULL to 24.0
+2026-03-23 16:10:06.000 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_Motion' changed from NULL to ON
+2026-03-23 16:10:06.007 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_HVAC_Mode' changed from OFF to COOL
+2026-03-23 16:10:06.009 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_HVAC_Power' changed from 0 W to 7800 W
+2026-03-23 16:10:06.010 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_Temperature' changed from NULL to 24.3 °C
+2026-03-23 16:10:06.012 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_Humidity' changed from NULL to 55.4
+2026-03-23 16:10:06.028 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_CO2' changed from NULL to 913.0
+2026-03-23 16:10:06.032 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_OccupancyCount' changed from NULL to 0.0
+2026-03-23 16:10:06.036 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_Motion' changed from NULL to OFF
+2026-03-23 16:10:06.038 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_Temperature' changed from NULL to 22.5 °C
+2026-03-23 16:10:06.039 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_Humidity' changed from NULL to 80.2
+2026-03-23 16:10:06.040 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_CO2' changed from NULL to 2000.0
+2026-03-23 16:10:06.041 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_OccupancyCount' changed from NULL to 10.0
+2026-03-23 16:10:06.043 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_Motion' changed from NULL to ON
+2026-03-23 16:10:06.044 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_Temperature' changed from NULL to 18.3 °C
+2026-03-23 16:10:06.046 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_Humidity' changed from NULL to 79.1
+2026-03-23 16:10:06.047 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_CO2' changed from NULL to 573.0
+2026-03-23 16:10:06.048 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_OccupancyCount' changed from NULL to 1
+2026-03-23 16:10:06.052 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_Motion' changed from NULL to ON
+2026-03-23 16:10:06.056 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_SystemStatus' changed from NULL to RUNNING
+2026-03-23 16:10:06.057 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalHVAC_Power' changed from 3390 W to 11190 W
+2026-03-23 16:10:06.057 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalPower' changed from 11530 W to 19330 W
+2026-03-23 16:10:06.069 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone1_TempDeviation' changed from 0.0 to 7.0
+2026-03-23 16:10:06.075 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone2_TempDeviation' changed from -3.0 to -0.7
+2026-03-23 16:10:06.076 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone3_TempDeviation' changed from 2.0 to 2.5
+2026-03-23 16:10:06.084 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Zone4_TempDeviation' changed from 2.0 to -1.7
+2026-03-23 16:10:06.085 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ComfortScore' changed from 80.0 to 91.0
+2026-03-23 16:10:06.087 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ComfortLevel' changed from GOOD to EXCELLENT
+2026-03-23 16:10:06.090 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_HumidityComfort' changed from 100 to 57.0
+2026-03-23 16:10:06.094 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EUI' changed from 348.3 to 583.9
+2026-03-23 16:10:06.096 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_EfficiencyScore' changed from 17.0 to 0.0
+2026-03-23 16:10:06.098 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Suggestion' changed from Consider LED upgrade and smart occupancy-based HVAC to Improve insulation and HVAC scheduling to reduce load
+2026-03-23 16:10:06.101 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_HVAC_Share' changed from 29.4 to 57.9
+2026-03-23 16:10:06.102 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_Server_Share' changed from 46.8 to 27.9
+2026-03-23 16:10:06.106 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_TotalOccupancy' changed from 0.0 to 35.0
+2026-03-23 16:10:06.114 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_OccupancyStatus' changed from UNOCCUPIED to MODERATE
+2026-03-23 16:10:06.118 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_PeakTime' changed from --:-- to 16:10
+2026-03-23 16:10:06.118 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_PeakOccupancy' changed from 0 to 35.0
+2026-03-23 16:10:06.119 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ActiveZones' changed from 0 to 3
+2026-03-23 16:10:06.123 [INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'Bld_ZonePattern' changed from Building unoccupied to Office:24, Lobby:10, Server Room:1

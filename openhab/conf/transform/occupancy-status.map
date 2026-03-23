@@ -1,0 +1,7 @@
+UNOCCUPIED=Unoccupied
+LOW=Low occupancy (1-15)
+MODERATE=Moderate (16-40)
+HIGH=High (41-70)
+PEAK=Peak occupancy (71+)
+NULL=Unknown
+UNDEF=Unknown

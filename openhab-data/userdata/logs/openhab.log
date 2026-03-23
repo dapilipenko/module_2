@@ -1,0 +1,31 @@
+2026-03-23 16:09:33.464 [INFO ] [org.openhab.core.Activator          ] - Starting openHAB 4.3.0 (Release Build)
+2026-03-23 16:09:33.789 [INFO ] [.core.internal.i18n.I18nProviderImpl] - Time zone set to 'Europe/Kiev'.
+2026-03-23 16:09:33.790 [INFO ] [.core.internal.i18n.I18nProviderImpl] - Locale set to 'uk'.
+2026-03-23 16:09:41.714 [WARN ] [.core.internal.folder.FolderObserver] - Directory 'things' does not exist in '/openhab/conf'. Please check your configuration settings!
+2026-03-23 16:09:41.716 [WARN ] [.core.internal.folder.FolderObserver] - Directory 'scripts' does not exist in '/openhab/conf'. Please check your configuration settings!
+2026-03-23 16:09:41.730 [WARN ] [.core.internal.folder.FolderObserver] - Directory 'rules' does not exist in '/openhab/conf'. Please check your configuration settings!
+2026-03-23 16:09:41.743 [INFO ] [el.core.internal.ModelRepositoryImpl] - Loading model 'building.items'
+2026-03-23 16:09:42.397 [INFO ] [el.core.internal.ModelRepositoryImpl] - Loading model 'rrd4j.persist'
+2026-03-23 16:09:42.456 [INFO ] [el.core.internal.ModelRepositoryImpl] - Loading model 'mapdb.persist'
+2026-03-23 16:09:42.871 [INFO ] [el.core.internal.ModelRepositoryImpl] - Loading model 'building.sitemap'
+2026-03-23 16:09:44.337 [WARN ] [ity.CommunityMarketplaceAddonService] - Unable to retrieve marketplace add-ons: java.lang.IllegalStateException: Expected a string but was BEGIN_OBJECT at line 1 column 20243 path $.topic_list.topics[1].tags[0]
+2026-03-23 16:09:45.984 [WARN ] [.transport.servlet.ServletController] - Can't find the request for http://localhost:8080/developer/log-viewer's Observer 
+2026-03-23 16:09:46.229 [INFO ] [.core.model.lsp.internal.ModelServer] - Started Language Server Protocol (LSP) service on port 5007
+2026-03-23 16:09:47.345 [WARN ] [.transport.servlet.ServletController] - Can't find the request for http://localhost:8080/developer/log-viewer's Observer 
+2026-03-23 16:09:49.214 [WARN ] [ty.util.ssl.SslContextFactory.config] - Trusting all certificates configured for Client@6945dd48[provider=null,keyStore=null,trustStore=null]
+2026-03-23 16:09:49.215 [WARN ] [ty.util.ssl.SslContextFactory.config] - No Client EndPointIdentificationAlgorithm configured for Client@6945dd48[provider=null,keyStore=null,trustStore=null]
+2026-03-23 16:09:49.495 [WARN ] [ty.util.ssl.SslContextFactory.config] - Trusting all certificates configured for Client@3a9406ab[provider=null,keyStore=null,trustStore=null]
+2026-03-23 16:09:49.496 [WARN ] [ty.util.ssl.SslContextFactory.config] - No Client EndPointIdentificationAlgorithm configured for Client@3a9406ab[provider=null,keyStore=null,trustStore=null]
+2026-03-23 16:10:00.282 [INFO ] [e.automation.internal.RuleEngineImpl] - Rule engine started.
+2026-03-23 16:10:00.325 [INFO ] [ort.loader.AbstractScriptFileWatcher] - (Re-)Loading script '/openhab/conf/automation/js/building-simulation.js'
+2026-03-23 16:10:04.889 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: Building simulation startup
+2026-03-23 16:10:05.026 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: Building simulation – every minute
+2026-03-23 16:10:05.044 [INFO ] [ort.loader.AbstractScriptFileWatcher] - (Re-)Loading script '/openhab/conf/automation/js/efficiency-calculations.js'
+2026-03-23 16:10:05.313 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: Efficiency calculations startup
+2026-03-23 16:10:05.320 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: Efficiency calculations – every minute
+2026-03-23 16:10:05.332 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: Efficiency – on total power update
+2026-03-23 16:10:05.355 [INFO ] [ort.loader.AbstractScriptFileWatcher] - (Re-)Loading script '/openhab/conf/automation/js/hvac-rules.js'
+2026-03-23 16:10:05.694 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: HVAC rules startup
+2026-03-23 16:10:05.855 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: HVAC rules – every minute
+2026-03-23 16:10:05.861 [INFO ] [.openhab.automation.openhab-js.rules] - Adding rule: HVAC rules – reactive
+2026-03-23 16:10:05.955 [INFO ] [ation.openhab-js.building-simulation] - Building warmup complete – Z1=29°C  Z2=24.3°C  Z3=22.5°C  Z4=18.3°C

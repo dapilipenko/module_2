@@ -1,0 +1,187 @@
+sitemap building label="Building Automation Analytics" {
+
+  // ── Building Overview ──────────────────────────────────────────────────
+  Frame label="Building Overview" {
+    Text  item=Bld_SystemStatus    label="BMS Status [%s]"
+    Text  item=Bld_OutdoorTemp     label="Outdoor Temperature [%.1f °C]"
+    Text  item=Bld_OutdoorHumidity label="Outdoor Humidity [%.1f %%]"
+    Text  item=Bld_TotalOccupancy  label="Total Occupancy [%.0f persons]"
+    Text  item=Bld_ActiveZones     label="Active Zones [%.0f / 4]"
+    Text  item=Bld_TotalPower      label="Building Power [%.0f W]"
+    Text  item=Bld_ComfortScore    label="Overall Comfort [%.0f %%]"
+                                   valuecolor=[>=85="green", >=70="yellow", <70="red"]
+    Text  item=Bld_EUI             label="Energy Use Intensity [%.1f kWh/m²/yr]"
+                                   valuecolor=[<=150="green", <=250="yellow", >250="red"]
+    Text  item=Bld_EfficiencyScore label="Efficiency Score [%.0f %%]"
+                                   valuecolor=[>=85="green", >=55="yellow", <55="red"]
+    Text  item=Bld_EfficiencyRating label="Efficiency Rating [%s]"
+                                   valuecolor=[==A="green", ==B="green", ==C="yellow", ==D="orange", ==E="red"]
+  }
+
+  // ── Zone 1: Office ─────────────────────────────────────────────────────
+  Frame label="Zone 1 · Office (120 m²)" {
+    Text  item=Zone1_Temperature    label="Temperature [%.1f °C]"
+                                    valuecolor=[<19="blue", >25="red", 19="green"]
+    Text  item=Zone1_Humidity       label="Humidity [%.1f %%]"
+    Text  item=Zone1_CO2            label="CO2 [%.0f ppm]"
+                                    valuecolor=[<=800="green", <=1200="yellow", >1200="red"]
+    Text  item=Zone1_OccupancyCount label="Occupancy [%.0f persons]"
+    Text  item=Zone1_Motion         label="Motion [%s]"
+                                    valuecolor=[==ON="green", ==OFF="gray"]
+    Text  item=Zone1_HVAC_Mode      label="HVAC Mode [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone1_HVAC_Setpoint  label="Setpoint [%.1f °C]"
+    Text  item=Zone1_HVAC_Power     label="HVAC Power [%.0f W]"
+    Text  item=Zone1_Lighting_Power label="Lighting [%.0f W]"
+    Text  item=Zone1_PMV            label="PMV Index [%.2f]"
+                                    valuecolor=[>=-0.5="green", >=-1.0="yellow", <-1.0="red"]
+    Text  item=Zone1_ComfortIndex   label="Comfort Index [%.0f %%]"
+                                    valuecolor=[>=85="green", >=70="yellow", <70="red"]
+    Text  item=Zone1_TempDeviation  label="Temp Deviation [%.1f °C]"
+    Chart item=Zone1_Temperature    period=D refresh=60000
+                                    label="Office Temperature (24 h)"
+  }
+
+  // ── Zone 2: Conference Room ────────────────────────────────────────────
+  Frame label="Zone 2 · Conference (60 m²)" {
+    Text  item=Zone2_Temperature    label="Temperature [%.1f °C]"
+                                    valuecolor=[<18="blue", >25="red", 18="green"]
+    Text  item=Zone2_Humidity       label="Humidity [%.1f %%]"
+    Text  item=Zone2_CO2            label="CO2 [%.0f ppm]"
+                                    valuecolor=[<=800="green", <=1200="yellow", >1200="red"]
+    Text  item=Zone2_OccupancyCount label="Occupancy [%.0f persons]"
+    Text  item=Zone2_Motion         label="Motion [%s]"
+                                    valuecolor=[==ON="green", ==OFF="gray"]
+    Text  item=Zone2_HVAC_Mode      label="HVAC Mode [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone2_HVAC_Setpoint  label="Setpoint [%.1f °C]"
+    Text  item=Zone2_HVAC_Power     label="HVAC Power [%.0f W]"
+    Text  item=Zone2_PMV            label="PMV Index [%.2f]"
+    Text  item=Zone2_ComfortIndex   label="Comfort Index [%.0f %%]"
+                                    valuecolor=[>=85="green", >=70="yellow", <70="red"]
+    Text  item=Zone2_TempDeviation  label="Temp Deviation [%.1f °C]"
+    Chart item=Zone2_Temperature    period=D refresh=60000
+                                    label="Conference Temperature (24 h)"
+  }
+
+  // ── Zone 3: Lobby ──────────────────────────────────────────────────────
+  Frame label="Zone 3 · Lobby (80 m²)" {
+    Text  item=Zone3_Temperature    label="Temperature [%.1f °C]"
+    Text  item=Zone3_Humidity       label="Humidity [%.1f %%]"
+    Text  item=Zone3_CO2            label="CO2 [%.0f ppm]"
+    Text  item=Zone3_OccupancyCount label="Occupancy [%.0f persons]"
+    Text  item=Zone3_Motion         label="Motion [%s]"
+                                    valuecolor=[==ON="green", ==OFF="gray"]
+    Text  item=Zone3_HVAC_Mode      label="HVAC Mode [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone3_HVAC_Setpoint  label="Setpoint [%.1f °C]"
+    Text  item=Zone3_HVAC_Power     label="HVAC Power [%.0f W]"
+    Text  item=Zone3_PMV            label="PMV Index [%.2f]"
+    Text  item=Zone3_ComfortIndex   label="Comfort Index [%.0f %%]"
+                                    valuecolor=[>=85="green", >=70="yellow", <70="red"]
+    Text  item=Zone3_TempDeviation  label="Temp Deviation [%.1f °C]"
+  }
+
+  // ── Zone 4: Server Room ────────────────────────────────────────────────
+  Frame label="Zone 4 · Server Room (30 m²)" {
+    Text  item=Zone4_Temperature    label="Temperature [%.1f °C]"
+                                    valuecolor=[<=22="green", <=26="yellow", >26="red"]
+    Text  item=Zone4_Humidity       label="Humidity [%.1f %%]"
+    Text  item=Zone4_CO2            label="CO2 [%.0f ppm]"
+    Text  item=Zone4_OccupancyCount label="Technician On-site [%.0f]"
+    Text  item=Zone4_HVAC_Mode      label="HVAC Mode [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==COOL="blue", ==FAN="green"]
+    Text  item=Zone4_HVAC_Setpoint  label="Cooling Target [%.1f °C]"
+    Text  item=Zone4_HVAC_Power     label="HVAC Power [%.0f W]"
+    Text  item=Zone4_Equip_Power    label="Server Load [%.0f W]"
+    Text  item=Zone4_PMV            label="Technician PMV [%.2f]"
+    Text  item=Zone4_TempDeviation  label="Temp Deviation [%.1f °C]"
+    Chart item=Zone4_Temperature    period=D refresh=60000
+                                    label="Server Room Temperature (24 h)"
+  }
+
+  // ── Comfort Analysis Dashboard ─────────────────────────────────────────
+  Frame label="Comfort Analysis" {
+    Text  item=Bld_ComfortScore    label="Overall Comfort Score [%.0f %%]"
+                                   valuecolor=[>=85="green", >=70="yellow", <70="red"]
+    Text  item=Bld_ComfortLevel    label="Comfort Level [MAP(comfort-level.map):%s]"
+    Text  item=Bld_HumidityComfort label="Humidity Comfort [%.0f %%]"
+    Text  item=Zone1_PMV           label="Office PMV [%.2f]"
+                                   valuecolor=[>=-0.5="green", >=-1.0="yellow", <-1.0="red"]
+    Text  item=Zone2_PMV           label="Conference PMV [%.2f]"
+                                   valuecolor=[>=-0.5="green", >=-1.0="yellow", <-1.0="red"]
+    Text  item=Zone3_PMV           label="Lobby PMV [%.2f]"
+    Text  item=Zone4_PMV           label="Server Room PMV [%.2f]"
+    Text  item=Zone1_ComfortIndex  label="Office Comfort [%.0f %%]"
+    Text  item=Zone2_ComfortIndex  label="Conference Comfort [%.0f %%]"
+    Text  item=Zone3_ComfortIndex  label="Lobby Comfort [%.0f %%]"
+    Text  item=Zone1_TempDeviation label="Office Temp Dev [%.1f °C]"
+    Text  item=Zone2_TempDeviation label="Conf Temp Dev [%.1f °C]"
+    Chart item=Bld_ComfortScore    period=D refresh=60000
+                                   label="Building Comfort Score (24 h)"
+  }
+
+  // ── Energy Efficiency Dashboard ────────────────────────────────────────
+  Frame label="Energy Efficiency Dashboard" {
+    Text  item=Bld_TotalPower       label="Instantaneous Power [%.0f W]"
+    Text  item=Bld_TotalHVAC_Power  label="HVAC Power [%.0f W]"
+    Text  item=Bld_TotalLight_Power label="Lighting Power [%.0f W]"
+    Text  item=Bld_TotalEquip_Power label="Equipment Power [%.0f W]"
+    Text  item=Bld_TotalEnergy_kWh  label="Energy Today [%.2f kWh]"
+    Text  item=Bld_EUI              label="EUI [%.1f kWh/m²/yr]"
+                                    valuecolor=[<=150="green", <=250="yellow", >250="red"]
+    Text  item=Bld_BenchmarkEUI     label="Benchmark EUI [%.0f kWh/m²/yr]"
+    Text  item=Bld_kWhPerM2         label="Energy per m² Today [%.3f kWh/m²]"
+    Text  item=Bld_HVAC_Share       label="HVAC Energy Share [%.1f %%]"
+    Text  item=Bld_Server_Share     label="Server Room Share [%.1f %%]"
+    Text  item=Bld_EfficiencyScore  label="Efficiency Score [%.0f %%]"
+                                    valuecolor=[>=85="green", >=55="yellow", <55="red"]
+    Text  item=Bld_EfficiencyRating label="Rating [MAP(efficiency-rating.map):%s]"
+                                    valuecolor=[==A="green", ==B="green", ==C="yellow", ==D="orange", ==E="red"]
+    Text  item=Bld_Suggestion       label="Suggestion [%s]"
+    Chart item=Bld_TotalPower       period=D refresh=60000
+                                    label="Power Consumption (24 h)"
+    Chart item=Bld_EUI              period=D refresh=60000
+                                    label="EUI Trend (24 h)"
+  }
+
+  // ── Occupancy Analytics Dashboard ──────────────────────────────────────
+  Frame label="Occupancy Analytics" {
+    Text  item=Bld_TotalOccupancy  label="Current Occupancy [%.0f persons]"
+    Text  item=Bld_OccupancyStatus label="Occupancy Level [MAP(occupancy-status.map):%s]"
+    Text  item=Bld_ActiveZones     label="Active Zones [%.0f / 4]"
+    Text  item=Zone1_OccupancyCount label="Office [%.0f persons]"
+    Text  item=Zone2_OccupancyCount label="Conference [%.0f persons]"
+    Text  item=Zone3_OccupancyCount label="Lobby [%.0f persons]"
+    Text  item=Zone4_OccupancyCount label="Server Room [%.0f person]"
+    Text  item=Bld_OccupancyPred   label="Predicted in 60 min [%.0f persons]"
+    Text  item=Bld_PeakOccupancy   label="Peak Occupancy (1 h) [%.0f persons]"
+    Text  item=Bld_PeakTime        label="Peak Time [%s]"
+    Text  item=Bld_OccupancyTrend  label="Trend [%.1f persons/hr]"
+    Text  item=Bld_ZonePattern     label="Zone Usage [%s]"
+    Chart item=Bld_TotalOccupancy  period=D refresh=60000
+                                   label="Building Occupancy (24 h)"
+  }
+
+  // ── HVAC System Summary ────────────────────────────────────────────────
+  Frame label="HVAC System Summary" {
+    Text  item=Bld_OutdoorTemp      label="Outdoor Reference [%.1f °C]"
+    Text  item=Zone1_HVAC_Mode      label="Office HVAC [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone1_HVAC_Setpoint  label="Office Setpoint [%.1f °C]"
+    Text  item=Zone1_HVAC_Power     label="Office HVAC Power [%.0f W]"
+    Text  item=Zone2_HVAC_Mode      label="Conference HVAC [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone2_HVAC_Setpoint  label="Conference Setpoint [%.1f °C]"
+    Text  item=Zone3_HVAC_Mode      label="Lobby HVAC [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==HEAT="orange", ==COOL="blue", ==FAN="green", ==OFF="gray"]
+    Text  item=Zone3_HVAC_Setpoint  label="Lobby Setpoint [%.1f °C]"
+    Text  item=Zone4_HVAC_Mode      label="Server HVAC [MAP(hvac-mode.map):%s]"
+                                    valuecolor=[==COOL="blue", ==FAN="green"]
+    Text  item=Zone4_HVAC_Setpoint  label="Server Target [%.1f °C]"
+    Text  item=Zone4_HVAC_Power     label="Server HVAC Power [%.0f W]"
+    Text  item=Bld_TotalHVAC_Power  label="Total HVAC Power [%.0f W]"
+    Chart item=Zone1_HVAC_Power     period=D refresh=60000
+                                    label="Office HVAC Power (24 h)"
+  }
+}

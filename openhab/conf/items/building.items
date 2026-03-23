@@ -1,0 +1,120 @@
+// ============================================================
+// Variant 4: Building Automation Analytics
+// Building Management System – Items
+// Zones: Office (120 m²) · Conference (60 m²) · Lobby (80 m²) · Server Room (30 m²)
+// ============================================================
+
+// ─── Persistence groups (base + building sub-groups) ───────────────────
+Group gRrd       "RRD4J Persistence"
+Group gMapDb     "MapDB Persistence"
+Group gBldRrd    "Building RRD4J"   (gRrd)
+Group gBldMapDb  "Building MapDB"   (gMapDb)
+
+// ─── Structural groups ───────────────────────────────────────────────────
+Group gBuilding   "Building"             <house>
+Group gZones      "Zones"                <corridor>       (gBuilding)
+Group gZone1      "Zone 1 · Office"      <office-chair>   (gZones)
+Group gZone2      "Zone 2 · Conference"  <office>         (gZones)
+Group gZone3      "Zone 3 · Lobby"       <door>           (gZones)
+Group gZone4      "Zone 4 · Server Room" <network>        (gZones)
+Group gHVAC       "HVAC System"          <climate>        (gBuilding)
+Group gOccupancy  "Occupancy"            <presence>       (gBuilding)
+Group gEnergy     "Energy"               <energy>         (gBuilding)
+Group gComfort    "Comfort"              <heating>        (gBuilding)
+
+// ─── Outdoor environment ─────────────────────────────────────────────────
+Number:Temperature      Bld_OutdoorTemp      "Outdoor Temp [%.1f °C]"       <thermometer>   (gBuilding, gBldRrd)  { unit="°C" }
+Number                  Bld_OutdoorHumidity  "Outdoor Humidity [%.1f %%]"   <humidity>      (gBuilding, gBldRrd)
+
+// ─── Zone 1 · Office (120 m², cap 40 persons) ────────────────────────────
+Number:Temperature      Zone1_Temperature    "Office Temp [%.1f °C]"        <thermometer>   (gZone1, gBldRrd)  { unit="°C" }
+Number                  Zone1_Humidity       "Office Humidity [%.1f %%]"    <humidity>      (gZone1, gBldRrd)
+Switch                  Zone1_Motion         "Office Motion [%s]"           <motion>        (gZone1)
+Number                  Zone1_CO2            "Office CO2 [%.0f ppm]"        <carbondioxide> (gZone1, gBldRrd)
+Number                  Zone1_OccupancyCount "Office Occupancy [%.0f]"      <group>         (gZone1, gBldRrd)
+Number:Temperature      Zone1_HVAC_Setpoint  "Office Setpoint [%.1f °C]"    <temperature>   (gZone1, gHVAC, gBldMapDb) { unit="°C" }
+String                  Zone1_HVAC_Mode      "Office HVAC Mode [%s]"        <climate>       (gZone1, gHVAC, gBldMapDb)
+Number:Power            Zone1_HVAC_Power     "Office HVAC Power [%.0f W]"   <energy>        (gZone1, gHVAC, gBldRrd)  { unit="W" }
+Number:Power            Zone1_Lighting_Power "Office Lighting [%.0f W]"     <lightbulb>     (gZone1, gBldRrd)         { unit="W" }
+Number:Power            Zone1_Equip_Power    "Office Equipment [%.0f W]"    <computer>      (gZone1, gBldRrd)         { unit="W" }
+Number                  Zone1_PMV            "Office PMV [%.2f]"            <temperature>   (gComfort, gBldRrd)
+Number                  Zone1_ComfortIndex   "Office Comfort [%.0f %%]"     <heating>       (gComfort, gBldRrd)
+Number                  Zone1_TempDeviation  "Office Temp Dev [%.1f °C]"    <thermometer>   (gComfort, gBldRrd)
+
+// ─── Zone 2 · Conference Room (60 m², cap 20 persons) ────────────────────
+Number:Temperature      Zone2_Temperature    "Conf Temp [%.1f °C]"          <thermometer>   (gZone2, gBldRrd)  { unit="°C" }
+Number                  Zone2_Humidity       "Conf Humidity [%.1f %%]"      <humidity>      (gZone2, gBldRrd)
+Switch                  Zone2_Motion         "Conf Motion [%s]"             <motion>        (gZone2)
+Number                  Zone2_CO2            "Conf CO2 [%.0f ppm]"          <carbondioxide> (gZone2, gBldRrd)
+Number                  Zone2_OccupancyCount "Conf Occupancy [%.0f]"        <group>         (gZone2, gBldRrd)
+Number:Temperature      Zone2_HVAC_Setpoint  "Conf Setpoint [%.1f °C]"      <temperature>   (gZone2, gHVAC, gBldMapDb) { unit="°C" }
+String                  Zone2_HVAC_Mode      "Conf HVAC Mode [%s]"          <climate>       (gZone2, gHVAC, gBldMapDb)
+Number:Power            Zone2_HVAC_Power     "Conf HVAC Power [%.0f W]"     <energy>        (gZone2, gHVAC, gBldRrd)  { unit="W" }
+Number:Power            Zone2_Lighting_Power "Conf Lighting [%.0f W]"       <lightbulb>     (gZone2, gBldRrd)         { unit="W" }
+Number:Power            Zone2_Equip_Power    "Conf Equipment [%.0f W]"      <computer>      (gZone2, gBldRrd)         { unit="W" }
+Number                  Zone2_PMV            "Conf PMV [%.2f]"              <temperature>   (gComfort, gBldRrd)
+Number                  Zone2_ComfortIndex   "Conf Comfort [%.0f %%]"       <heating>       (gComfort, gBldRrd)
+Number                  Zone2_TempDeviation  "Conf Temp Dev [%.1f °C]"      <thermometer>   (gComfort, gBldRrd)
+
+// ─── Zone 3 · Lobby (80 m², cap 30 persons) ──────────────────────────────
+Number:Temperature      Zone3_Temperature    "Lobby Temp [%.1f °C]"         <thermometer>   (gZone3, gBldRrd)  { unit="°C" }
+Number                  Zone3_Humidity       "Lobby Humidity [%.1f %%]"     <humidity>      (gZone3, gBldRrd)
+Switch                  Zone3_Motion         "Lobby Motion [%s]"            <motion>        (gZone3)
+Number                  Zone3_CO2            "Lobby CO2 [%.0f ppm]"         <carbondioxide> (gZone3, gBldRrd)
+Number                  Zone3_OccupancyCount "Lobby Occupancy [%.0f]"       <group>         (gZone3, gBldRrd)
+Number:Temperature      Zone3_HVAC_Setpoint  "Lobby Setpoint [%.1f °C]"     <temperature>   (gZone3, gHVAC, gBldMapDb) { unit="°C" }
+String                  Zone3_HVAC_Mode      "Lobby HVAC Mode [%s]"         <climate>       (gZone3, gHVAC, gBldMapDb)
+Number:Power            Zone3_HVAC_Power     "Lobby HVAC Power [%.0f W]"    <energy>        (gZone3, gHVAC, gBldRrd)  { unit="W" }
+Number:Power            Zone3_Lighting_Power "Lobby Lighting [%.0f W]"      <lightbulb>     (gZone3, gBldRrd)         { unit="W" }
+Number:Power            Zone3_Equip_Power    "Lobby Equipment [%.0f W]"     <computer>      (gZone3, gBldRrd)         { unit="W" }
+Number                  Zone3_PMV            "Lobby PMV [%.2f]"             <temperature>   (gComfort, gBldRrd)
+Number                  Zone3_ComfortIndex   "Lobby Comfort [%.0f %%]"      <heating>       (gComfort, gBldRrd)
+Number                  Zone3_TempDeviation  "Lobby Temp Dev [%.1f °C]"     <thermometer>   (gComfort, gBldRrd)
+
+// ─── Zone 4 · Server Room (30 m², always cooling) ────────────────────────
+Number:Temperature      Zone4_Temperature    "Server Temp [%.1f °C]"        <thermometer>   (gZone4, gBldRrd)  { unit="°C" }
+Number                  Zone4_Humidity       "Server Humidity [%.1f %%]"    <humidity>      (gZone4, gBldRrd)
+Switch                  Zone4_Motion         "Server Motion [%s]"           <motion>        (gZone4)
+Number                  Zone4_CO2            "Server CO2 [%.0f ppm]"        <carbondioxide> (gZone4, gBldRrd)
+Number                  Zone4_OccupancyCount "Server Occupancy [%.0f]"      <group>         (gZone4, gBldRrd)
+Number:Temperature      Zone4_HVAC_Setpoint  "Server Setpoint [%.1f °C]"    <temperature>   (gZone4, gHVAC, gBldMapDb) { unit="°C" }
+String                  Zone4_HVAC_Mode      "Server HVAC Mode [%s]"        <climate>       (gZone4, gHVAC, gBldMapDb)
+Number:Power            Zone4_HVAC_Power     "Server HVAC Power [%.0f W]"   <energy>        (gZone4, gHVAC, gBldRrd)  { unit="W" }
+Number:Power            Zone4_Lighting_Power "Server Lighting [%.0f W]"     <lightbulb>     (gZone4, gBldRrd)         { unit="W" }
+Number:Power            Zone4_Equip_Power    "Server Equipment [%.0f W]"    <computer>      (gZone4, gBldRrd)         { unit="W" }
+Number                  Zone4_PMV            "Server PMV [%.2f]"            <temperature>   (gComfort, gBldRrd)
+Number                  Zone4_ComfortIndex   "Server Comfort [%.0f %%]"     <heating>       (gComfort, gBldRrd)
+Number                  Zone4_TempDeviation  "Server Temp Dev [%.1f °C]"    <thermometer>   (gComfort, gBldRrd)
+
+// ─── Building-level comfort ───────────────────────────────────────────────
+Number                  Bld_ComfortScore     "Overall Comfort [%.0f %%]"    <heating>       (gComfort, gBldRrd)
+String                  Bld_ComfortLevel     "Comfort Level [%s]"           <heating>       (gComfort, gBldMapDb)
+Number                  Bld_HumidityComfort  "Humidity Comfort [%.0f %%]"   <humidity>      (gComfort, gBldRrd)
+
+// ─── Energy dashboard ────────────────────────────────────────────────────
+Number:Power            Bld_TotalHVAC_Power  "Total HVAC [%.0f W]"          <energy>        (gEnergy, gBldRrd)  { unit="W" }
+Number:Power            Bld_TotalLight_Power "Total Lighting [%.0f W]"      <lightbulb>     (gEnergy, gBldRrd)  { unit="W" }
+Number:Power            Bld_TotalEquip_Power "Total Equipment [%.0f W]"     <computer>      (gEnergy, gBldRrd)  { unit="W" }
+Number:Power            Bld_TotalPower       "Total Power [%.0f W]"         <energy>        (gEnergy, gBldRrd)  { unit="W" }
+Number                  Bld_TotalEnergy_kWh  "Energy Today [%.2f kWh]"      <energy>        (gEnergy, gBldRrd)
+Number                  Bld_EUI              "EUI [%.1f kWh/m²/yr]"         <energy>        (gEnergy, gBldRrd)
+Number                  Bld_kWhPerM2         "Energy/Area [%.3f kWh/m²]"    <energy>        (gEnergy, gBldRrd)
+Number                  Bld_EfficiencyScore  "Efficiency Score [%.0f %%]"   <battery>       (gEnergy, gBldRrd)
+Number                  Bld_BenchmarkEUI     "Benchmark EUI [%.0f kWh/m²/yr]" <energy>      (gEnergy, gBldMapDb)
+String                  Bld_EfficiencyRating "Efficiency Rating [%s]"       <battery>       (gEnergy, gBldMapDb)
+String                  Bld_Suggestion       "Improvement Suggestion [%s]"  <text>          (gEnergy, gBldMapDb)
+Number                  Bld_HVAC_Share       "HVAC Energy Share [%.1f %%]"  <energy>        (gEnergy, gBldRrd)
+Number                  Bld_Server_Share     "Server Energy Share [%.1f %%]" <network>      (gEnergy, gBldRrd)
+
+// ─── Occupancy analytics ─────────────────────────────────────────────────
+Number                  Bld_TotalOccupancy   "Total Occupancy [%.0f]"       <group>         (gOccupancy, gBldRrd)
+String                  Bld_OccupancyStatus  "Occupancy Status [%s]"        <presence>      (gOccupancy, gBldMapDb)
+Number                  Bld_OccupancyPred    "Predicted 60 min [%.0f]"      <group>         (gOccupancy, gBldRrd)
+String                  Bld_PeakTime         "Peak Time [%s]"               <time>          (gOccupancy, gBldMapDb)
+Number                  Bld_PeakOccupancy    "Peak Occupancy [%.0f]"        <group>         (gOccupancy, gBldRrd)
+Number                  Bld_OccupancyTrend   "Trend [%.1f /hr]"             <group>         (gOccupancy, gBldRrd)
+Number                  Bld_ActiveZones      "Active Zones [%.0f]"          <corridor>      (gOccupancy, gBldRrd)
+String                  Bld_ZonePattern      "Zone Pattern [%s]"            <text>          (gOccupancy, gBldMapDb)
+
+// ─── System status ───────────────────────────────────────────────────────
+String                  Bld_SystemStatus     "Building BMS [%s]"            <status>        (gBuilding, gBldMapDb)
