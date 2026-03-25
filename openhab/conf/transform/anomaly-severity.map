@@ -1,8 +1,0 @@
-NONE=Normal
-THRESHOLD=Hard Limit Exceeded
-THRESHOLD_WARN=Near Limit
-ZSCORE=Z-Score Outlier
-IQR=IQR Outlier
-EWMA=EWMA Trend Deviation
-NULL=Unknown
--=Unknown
