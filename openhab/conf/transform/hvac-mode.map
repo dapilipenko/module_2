@@ -1,6 +1,0 @@
-HEAT=Heating
-COOL=Cooling
-FAN=Ventilation
-OFF=Off
-NULL=Unknown
-UNDEF=Unknown

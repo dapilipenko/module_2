@@ -1,0 +1,118 @@
+// ============================================================
+// Variant 5: Edge Analytics Node
+// Local aggregation · statistical processing · anomaly detection
+// Minimal cloud alerts (summaries only – no raw data upload)
+// ============================================================
+
+// ─── Persistence groups ────────────────────────────────────────────────────
+// Top-level persistence strategy groups (standalone – no dependency on building.items)
+Group gRrd        "RRD4J Persistence"
+Group gMapDb      "MapDB Persistence"
+Group gEdgeRrd    "Edge RRD4J"   (gRrd)
+Group gEdgeMapDb  "Edge MapDB"   (gMapDb)
+
+// ─── Raw Data Sources ─────────────────────────────────────────────────────
+// Zone 1 · Office
+Number  Zone1_Temperature "Office Temp [%.1f °C]"  <thermometer>  (gEdge, gEdgeRrd)
+Number  Zone1_CO2        "Office CO2 [%.0f ppm]"  <carbondioxide> (gEdge, gEdgeRrd)
+
+// Zone 2 · Conference
+Number  Zone2_Temperature "Conference Temp [%.1f °C]"  <thermometer>  (gEdge, gEdgeRrd)
+Number  Zone2_CO2        "Conference CO2 [%.0f ppm]"  <carbondioxide> (gEdge, gEdgeRrd)
+
+// Zone 3 · Lobby
+Number  Zone3_Temperature "Lobby Temp [%.1f °C]"  <thermometer>  (gEdge, gEdgeRrd)
+Number  Zone3_CO2        "Lobby CO2 [%.0f ppm]"  <carbondioxide> (gEdge, gEdgeRrd)
+
+// Zone 4 · Server Room
+Number  Zone4_Temperature "Server Room Temp [%.1f °C]"  <thermometer>  (gEdge, gEdgeRrd)
+Number  Zone4_CO2        "Server Room CO2 [%.0f ppm]"  <carbondioxide> (gEdge, gEdgeRrd)
+
+// Building Power
+Number  Bld_TotalPower   "Building Total Power [%.0f W]" <energy> (gEdge, gEdgeRrd)
+
+// ─── Structural groups ────────────────────────────────────────────────────
+Group gEdge        "Edge Analytics Node"  <network>
+Group gEdgeStats   "Edge Statistics"      <chart>    (gEdge)
+Group gEdgeAnomaly "Anomaly Detection"    <alarm>    (gEdge)
+Group gEdgeCloud   "Cloud Communication" <network>  (gEdge)
+
+// ─── Node status ──────────────────────────────────────────────────────────
+String  Edge_Status            "Edge Node [%s]"              <network>  (gEdge, gEdgeMapDb)
+String  Edge_LastAggregation   "Last Aggregation [%s]"       <time>     (gEdge, gEdgeMapDb)
+Number  Edge_BufferUtilization "Buffer Used [%.0f %%]"       <network>  (gEdge, gEdgeRrd)
+Number  Edge_CompressionRatio  "Compression Ratio [%.0f %%]" <network>  (gEdge, gEdgeRrd)
+Number  Edge_BandwidthSaving   "Bandwidth Saved [%.0f %%]"   <network>  (gEdge, gEdgeRrd)
+
+// ─── Alert / cloud communication ──────────────────────────────────────────
+Switch  Edge_Alert_Active   "Alert Active [%s]"        <alarm>   (gEdgeCloud, gEdgeMapDb)
+Number  Edge_Alert_Count    "Alerts This Cycle [%.0f]" <alarm>   (gEdgeCloud, gEdgeRrd)
+Number  Edge_AlertsSent     "Total Alerts Sent [%.0f]" <alarm>   (gEdgeCloud, gEdgeMapDb)
+String  Edge_Alert_LastMsg  "Last Alert [%s]"          <text>    (gEdgeCloud, gEdgeMapDb)
+String  Edge_Alert_Severity "Severity [%s]"            <alarm>   (gEdgeCloud, gEdgeMapDb)
+String  Edge_CloudStatus    "Cloud Status [%s]"        <network> (gEdgeCloud, gEdgeMapDb)
+Number  Edge_Batch_Count    "Batches Sent [%.0f]"      <network> (gEdgeCloud, gEdgeRrd)
+
+// ─── Building power statistics ────────────────────────────────────────────
+Number  Bld_Power_SMA5        "Power SMA-5 [%.0f W]"      <energy>  (gEdgeStats, gEdgeRrd)
+Number  Bld_Power_SMA60       "Power SMA-60 [%.0f W]"     <energy>  (gEdgeStats, gEdgeRrd)
+Number  Bld_Power_StdDev      "Power StdDev [%.0f W]"     <energy>  (gEdgeStats, gEdgeRrd)
+Number  Bld_Power_Variance    "Power Variance [%.0f W²]"  <energy>  (gEdgeStats, gEdgeRrd)
+Number  Bld_Power_EWMA        "Power EWMA [%.0f W]"       <energy>  (gEdgeStats, gEdgeRrd)
+Number  Bld_Power_ZScore      "Power Z-Score [%.2f]"      <network> (gEdgeStats, gEdgeRrd)
+String  Bld_Power_AnomalyType "Power Anomaly [%s]"        <alarm>   (gEdgeAnomaly, gEdgeMapDb)
+
+// ─── Zone 1 · Office – statistics ────────────────────────────────────────
+Number  Zone1_Temp_SMA5        "Office Temp SMA-5 [%.1f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone1_Temp_SMA60       "Office Temp SMA-60 [%.1f °C]"  <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone1_Temp_StdDev      "Office Temp StdDev [%.2f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone1_Temp_Variance    "Office Temp Var [%.2f °C²]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone1_Temp_EWMA        "Office Temp EWMA [%.1f °C]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone1_Temp_ZScore      "Office Temp Z-Score [%.2f]"    <network>       (gEdgeStats, gEdgeRrd)
+String  Zone1_Temp_AnomalyType "Office Temp Anomaly [%s]"      <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone1_CO2_SMA5         "Office CO2 SMA-5 [%.0f ppm]"   <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone1_CO2_SMA60        "Office CO2 SMA-60 [%.0f ppm]"  <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone1_CO2_ZScore       "Office CO2 Z-Score [%.2f]"     <network>       (gEdgeStats, gEdgeRrd)
+String  Zone1_CO2_AnomalyType  "Office CO2 Anomaly [%s]"       <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone1_TempCO2_Corr     "Office Temp-CO2 Corr [%.2f]"   <chart>         (gEdgeStats, gEdgeRrd)
+
+// ─── Zone 2 · Conference – statistics ────────────────────────────────────
+Number  Zone2_Temp_SMA5        "Conf Temp SMA-5 [%.1f °C]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone2_Temp_SMA60       "Conf Temp SMA-60 [%.1f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone2_Temp_StdDev      "Conf Temp StdDev [%.2f °C]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone2_Temp_Variance    "Conf Temp Var [%.2f °C²]"     <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone2_Temp_EWMA        "Conf Temp EWMA [%.1f °C]"     <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone2_Temp_ZScore      "Conf Temp Z-Score [%.2f]"     <network>       (gEdgeStats, gEdgeRrd)
+String  Zone2_Temp_AnomalyType "Conf Temp Anomaly [%s]"       <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone2_CO2_SMA5         "Conf CO2 SMA-5 [%.0f ppm]"    <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone2_CO2_SMA60        "Conf CO2 SMA-60 [%.0f ppm]"   <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone2_CO2_ZScore       "Conf CO2 Z-Score [%.2f]"      <network>       (gEdgeStats, gEdgeRrd)
+String  Zone2_CO2_AnomalyType  "Conf CO2 Anomaly [%s]"        <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone2_TempCO2_Corr     "Conf Temp-CO2 Corr [%.2f]"    <chart>         (gEdgeStats, gEdgeRrd)
+
+// ─── Zone 3 · Lobby – statistics ─────────────────────────────────────────
+Number  Zone3_Temp_SMA5        "Lobby Temp SMA-5 [%.1f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone3_Temp_SMA60       "Lobby Temp SMA-60 [%.1f °C]"  <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone3_Temp_StdDev      "Lobby Temp StdDev [%.2f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone3_Temp_Variance    "Lobby Temp Var [%.2f °C²]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone3_Temp_EWMA        "Lobby Temp EWMA [%.1f °C]"    <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone3_Temp_ZScore      "Lobby Temp Z-Score [%.2f]"    <network>       (gEdgeStats, gEdgeRrd)
+String  Zone3_Temp_AnomalyType "Lobby Temp Anomaly [%s]"      <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone3_CO2_SMA5         "Lobby CO2 SMA-5 [%.0f ppm]"   <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone3_CO2_SMA60        "Lobby CO2 SMA-60 [%.0f ppm]"  <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone3_CO2_ZScore       "Lobby CO2 Z-Score [%.2f]"     <network>       (gEdgeStats, gEdgeRrd)
+String  Zone3_CO2_AnomalyType  "Lobby CO2 Anomaly [%s]"       <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone3_TempCO2_Corr     "Lobby Temp-CO2 Corr [%.2f]"   <chart>         (gEdgeStats, gEdgeRrd)
+
+// ─── Zone 4 · Server Room – statistics ───────────────────────────────────
+Number  Zone4_Temp_SMA5        "Server Temp SMA-5 [%.1f °C]"  <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone4_Temp_SMA60       "Server Temp SMA-60 [%.1f °C]" <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone4_Temp_StdDev      "Server Temp StdDev [%.2f °C]"  <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone4_Temp_Variance    "Server Temp Var [%.2f °C²]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone4_Temp_EWMA        "Server Temp EWMA [%.1f °C]"   <thermometer>   (gEdgeStats, gEdgeRrd)
+Number  Zone4_Temp_ZScore      "Server Temp Z-Score [%.2f]"   <network>       (gEdgeStats, gEdgeRrd)
+String  Zone4_Temp_AnomalyType "Server Temp Anomaly [%s]"     <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone4_CO2_SMA5         "Server CO2 SMA-5 [%.0f ppm]"  <carbondioxide> (gEdgeStats, gEdgeRrd)
+Number  Zone4_CO2_ZScore       "Server CO2 Z-Score [%.2f]"    <network>       (gEdgeStats, gEdgeRrd)
+String  Zone4_CO2_AnomalyType  "Server CO2 Anomaly [%s]"      <alarm>         (gEdgeAnomaly, gEdgeMapDb)
+Number  Zone4_TempCO2_Corr     "Server Temp-CO2 Corr [%.2f]"  <chart>         (gEdgeStats, gEdgeRrd)

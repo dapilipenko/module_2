@@ -1,6 +1,0 @@
-osgi.wiring.package; (&(osgi.wiring.package=com.zsmartsystems.zigbee.transport)(&(version>=1.4.0)(!(version>=2.0.0))))
-255; version=1.4.14
-osgi.wiring.package; (&(osgi.wiring.package=org.slf4j)(&(version>=1.7.0)(!(version>=2.0.0))))
-4; version=1.7.36
-osgi.wiring.package; (osgi.wiring.package=org.openhab.core.io.transport.serial)
-315; version=4.3.0

@@ -1,8 +1,8 @@
-# OpenHAB Variant 4 – Building Automation Analytics
+# Variant 5 – Edge Analytics Node
 
-This repository implements **Variant 4: Building Management System** with HVAC optimisation, occupancy-based scheduling, comfort index calculation, and energy efficiency scoring.
+## Overview
 
-The system simulates a four-zone commercial building, applies a thermal model driven by occupancy patterns and real-time HVAC decisions, and exposes all metrics through a comprehensive OpenHAB dashboard.
+This repository implements **Variant 5: Edge Analytics Node** with local data aggregation, anomaly detection, and minimal cloud communication. The system layers on top of a four-zone building simulation (Variant 4), processing all sensor data locally on the edge device and transmitting only anomaly summary notifications to the cloud.
 
 ---
 
@@ -12,8 +12,60 @@ The system simulates a four-zone commercial building, applies a thermal model dr
 docker compose up -d --build
 ```
 
-Open OpenHAB at **http://localhost:8080** and select the **building** sitemap.
-The simulation pre-warms 90 minutes of synthetic history on every startup so charts and analytics are populated immediately.
+Open OpenHAB at **http://localhost:8080** and select the **edge_analytics** sitemap.
+Statistics and anomaly detection populate within the first minute of operation.
+
+---
+
+## Edge Analytics Architecture
+
+```
+Sensor data (9 sensors: 4×temp, 4×CO2, 1×power)
+    │
+    ▼  :25s
+┌──────────────────────────────────────────────────────┐
+│  edge-aggregation.js – Local Data Aggregation        │
+│  Circular buffers (60 samples) · SMA-5 · SMA-60     │
+│  StdDev · Min/Max · Compression ratio tracking       │
+│  Raw data never leaves the node                      │
+└──────────────────────────────────────────────────────┘
+    │  cache.shared (JSON-serialized stats per sensor)
+    ▼  :30s
+┌──────────────────────────────────────────────────────┐
+│  edge-analytics.js – Statistical Processing          │
+│  EWMA (α=0.1) · Z-score · Pearson correlation (r)   │
+└──────────────────────────────────────────────────────┘
+    │  cache.shared (enriched stats + Z-scores)
+    ▼  :35s
+┌──────────────────────────────────────────────────────┐
+│  anomaly-detection.js – Anomaly Detection            │
+│  Threshold · Z-score · IQR · EWMA deviation          │
+│  → alert queue in cache.shared (JSON string)         │
+└──────────────────────────────────────────────────────┘
+    │  alert queue (summaries only)
+    ▼  :40s
+┌──────────────────────────────────────────────────────┐
+│  cloud-alerts.js – Cloud Alert Dispatcher            │
+│  Compact JSON · HTTP POST · batch optimisation       │
+│  Idle when no anomalies → 0 bytes sent               │
+└──────────────────────────────────────────────────────┘
+    │
+    ▼  HTTPS
+  Cloud endpoint (alert summaries only – no raw data)
+```
+
+### Rule Execution Pipeline
+
+The four edge analytics rules run in sequence every minute using cron offsets:
+
+```
+:25s  edge-aggregation.js   – Update buffers, compute SMA-5, SMA-60, StdDev
+:30s  edge-analytics.js     – Compute EWMA, Z-scores, Pearson correlations
+:35s  anomaly-detection.js  – Multi-method anomaly classification, build alert queue
+:40s  cloud-alerts.js       – HTTP POST alert batch (only when anomalies present)
+```
+
+On startup all four rules also fire via `SystemStartlevelTrigger(100)` so the dashboard is immediately populated.
 
 ---
 
@@ -29,287 +81,335 @@ The simulation pre-warms 90 minutes of synthetic history on every startup so cha
 
 ---
 
-## Architecture
+## Local Data Aggregation
 
-```
-openhab/conf/
-├── items/
-│   └── building.items           # Variant 4 building automation items
-├── automation/js/
-│   ├── building-simulation.js         # Zone thermal model + occupancy
-│   ├── hvac-rules.js                  # HVAC optimisation + power calculation
-│   └── efficiency-calculations.js     # PMV comfort + energy metrics + occupancy analytics
-├── sitemaps/
-│   └── building.sitemap         # Variant 4 building automation dashboard
-├── persistence/
-│   ├── rrd4j.persist            # Time-series persistence (gRrd* group)
-│   └── mapdb.persist            # Restart-restore persistence (gMapDb* group)
-├── services/
-│   ├── addons.cfg               # JSScripting + rrd4j + mapdb + MAP + BasicUI
-│   ├── basicui.cfg              # Default sitemap: analytics
-│   └── persistence.cfg          # Default backend: rrd4j
-└── transform/
-    ├── hvac-mode.map            # HEAT/COOL/FAN/OFF → human labels
-    ├── comfort-level.map        # EXCELLENT … UNACCEPTABLE → human labels
-    ├── occupancy-status.map     # UNOCCUPIED … PEAK → human labels
-    └── efficiency-rating.map    # A … E → human labels
-```
+### Circular Buffering
 
----
+Each sensor maintains a **60-sample circular buffer** (1 reading/min = 1 h rolling window). Buffers are stored as JSON strings in OpenHAB's `cache.shared` in-memory store for thread-safe inter-script communication.
 
-## Rule Execution Pipeline
+| Sensor group    | Sensors tracked        |
+|-----------------|------------------------|
+| Zone temps      | Zone1…4 Temperature    |
+| Zone CO2        | Zone1…4 CO2            |
+| Building power  | Bld_TotalPower         |
+| **Total**       | **9 sensors**          |
 
-The three building rule files run in sequence every minute using cron offsets:
+Buffer memory footprint: 9 sensors × 60 readings × 8 bytes = **4 320 bytes** (~4 KB).
 
-```
-:00 s  building-simulation.js   – Update outdoor conditions, zone temps/humidity/CO2, occupancy
-:05 s  hvac-rules.js            – Compute setpoints, HVAC modes, and power consumption
-:15 s  efficiency-calculations.js – Compute PMV, energy metrics, occupancy analytics
-```
+### Time-Window Aggregations
 
-On startup all three rules also fire via `SystemStartlevelTrigger(100)` so the dashboard is immediately populated.
+| Statistic | Window | Description |
+|-----------|--------|-------------|
+| SMA-5     | 5 min  | Short-term responsive moving average |
+| SMA-60    | 60 min | Long-term trend baseline |
+| StdDev    | 60 min | Population standard deviation |
+| Min/Max   | 60 min | Range boundaries |
+
+### Data Compression
+
+Rather than retaining all 60 raw readings, downstream rules consume 4 aggregate values per sensor (mean, std, min, max), achieving a **93 % compression ratio** (4 values vs 60 raw points).
 
 ---
 
-## HVAC Optimisation Algorithm
+## Statistical Methods
 
-### Per-zone setpoint logic
+### Simple Moving Average (SMA)
 
 ```
-occupied or pre-conditioning (30-min look-ahead):
-    setpoint = comfort_target   (22 °C office, 21 °C conf, 20 °C lobby)
-    + 0.5 °C  if outdoor < 0 °C   (draught compensation)
-    + 0.5 °C  if outdoor > 32 °C  (peak-load relief)
-
-unoccupied / economy mode:
-    setpoint = 16 °C            (frost protection,  if outdoor < 10 °C)
-    setpoint = comfort + 4 °C   (passive tolerance, otherwise)
-
-server room (Z4): constant 20 °C cooling target, no heating ever
+SMA-5  = mean of last 5 readings   (responsive, noise-reduced)
+SMA-60 = mean of all 60 readings   (trend baseline)
 ```
 
-### Mode decision
+SMA-5 tracks short-term changes; SMA-60 provides the stable long-term reference against which deviations are measured.
 
-| Condition                        | Mode  |
-|----------------------------------|-------|
-| temp < setpoint − 0.5 °C        | HEAT  |
-| temp > setpoint + 0.5 °C        | COOL  |
-| \|error\| ≤ 0.3 °C              | OFF   |
-| otherwise                        | FAN   |
-| server room always               | COOL / FAN (never HEAT) |
+### Standard Deviation (σ)
 
-### Power model
+Population standard deviation over the full 60-sample window:
 
-| Mode  | Formula                                          | Cap          |
-|-------|--------------------------------------------------|--------------|
-| HEAT  | ΔT × area × 25 W/(°C·m²)                       | 55 W/m²      |
-| COOL  | ΔT × area × 30 W/(°C·m²)                       | 65 W/m²      |
-| FAN   | area × 3 W/m²                                   | –            |
-| OFF   | 0 W                                              | –            |
+```
+σ = √[ Σ(xᵢ − x̄)² / N ]
+```
 
-### Additional loads
+σ characterises the normal variability of each sensor and gates the sensitivity of Z-score and EWMA detection.
 
-| Category  | Office  | Conference | Lobby  | Server Room |
-|-----------|---------|------------|--------|-------------|
-| Lighting  | 10 W/m² | 12 W/m²   | 8 W/m² | 5 W/m²      |
-| Equipment | 15 W/m² | 5 W/m²    | 8 W/m² | 180 W/m²    |
+### Exponentially Weighted Moving Average (EWMA)
 
-Lighting is only applied when the zone is occupied.
+```
+EWMA_t = α × x_t + (1 − α) × EWMA_{t-1}     α = 0.10
+```
+
+With α = 0.10, the effective memory span is ≈ 9.5 minutes. EWMA tracks long-term drift while suppressing noise. Large deviations between the current reading and EWMA forecast signal sudden state changes.
+
+### Pearson Correlation (r)
+
+```
+r(Temp, CO2) = Σ[(xᵢ − x̄)(yᵢ − ȳ)] / √[Σ(xᵢ−x̄)² · Σ(yᵢ−ȳ)²]
+```
+
+Computed per zone over the aligned 60-sample window. In a well-ventilated zone r ≈ 0 (independent). High positive correlation (r > 0.7) suggests poor ventilation where rising occupancy drives both temperature and CO2 upward simultaneously.
 
 ---
 
-## Occupancy Pattern Simulation
+## Anomaly Detection Algorithms
 
-Zone occupancy is modelled as a deterministic function of time-of-day and day-of-week with small stochastic noise.
+Four methods are applied in priority order; the first positive match wins.
 
-| Zone          | Weekday schedule                                        | Peak        |
-|---------------|---------------------------------------------------------|-------------|
-| Office        | 8:00–18:30, Gaussian arrival/departure, lunch dip       | ~40 persons |
-| Conference    | Meeting blocks 9–11, 11–12, 13–15, 15–17 (75 % prob)  | ~20 persons |
-| Lobby         | 7:00–19:00, peaks at arrival, lunch, departure          | ~30 persons |
-| Server Room   | Random technician visits (~1/hour on weekdays)          | 1 person    |
+### 1. Threshold-Based Detection
 
-The HVAC controller looks **30 minutes ahead** (pre-conditioning) so zones reach comfort temperature before occupancy begins.
+Hard physical limits that always indicate a fault condition:
+
+| Sensor             | Min    | Max      | Warning    |
+|--------------------|--------|----------|------------|
+| Zone 1–3 Temp      | 14 °C  | 34 °C    | –          |
+| Zone 4 Server Temp | 15 °C  | 35 °C    | ≥ 32 °C    |
+| Zone CO2           | –      | 2000 ppm | ≥ 1500 ppm |
+| Building Power     | –      | 200 kW   | ≥ 150 kW   |
+
+Threshold detections bypass statistical methods and fire immediately regardless of buffer size.
+
+### 2. Z-Score Method
+
+```
+z = (x_current − μ₆₀) / σ₆₀
+
+Anomaly if |z| > 2.5  (≈ 99 % confidence interval)
+```
+
+Identifies readings that are statistically improbable given the recent 60-min distribution. Requires ≥ 10 buffer samples before activating.
+
+### 3. IQR Method (Tukey Fences)
+
+```
+Q1 = 25th percentile of buffer
+Q3 = 75th percentile of buffer
+IQR = Q3 − Q1
+
+Outlier if x < Q1 − 1.5 × IQR  or  x > Q3 + 1.5 × IQR
+```
+
+Robust to non-Gaussian distributions and insensitive to extreme outliers distorting the quartiles. Fires if the Z-score method did not (e.g., when σ is inflated by a previous anomaly).
+
+### 4. EWMA Deviation Method
+
+```
+deviation = |x_current − EWMA|
+
+Anomaly if deviation > 2 × σ₆₀
+```
+
+Detects sudden step-changes that may not yet have inflated the 60-min Z-score. Particularly effective at catching rapid onset events (e.g., server room cooling failure, sudden occupancy surge).
+
+### Detection Priority Summary
+
+| Priority | Method          | Condition                        | Label            |
+|----------|-----------------|----------------------------------|------------------|
+| 1        | Hard threshold  | x < min or x > max              | `THRESHOLD`      |
+| 2        | Soft threshold  | x > warn limit                   | `THRESHOLD_WARN` |
+| 3        | Z-score         | \|z\| > 2.5                      | `ZSCORE`         |
+| 4        | IQR             | Tukey outlier fence              | `IQR`            |
+| 5        | EWMA deviation  | \|x − EWMA\| > 2σ               | `EWMA`           |
+| –        | No anomaly      | –                                | `NONE`           |
 
 ---
 
-## Comfort Index Calculation
+## Bandwidth Savings Analysis
 
-### PMV – Predicted Mean Vote (ISO 7730 Fanger model)
+### Baseline: Naive Raw Streaming
 
-The full ISO 7730 iterative formula is implemented in `efficiency-calculations.js`:
-
-```
-PMV = (0.303 · e^(-0.036·M) + 0.028) · L
-
-L = (M−W) − 3.05×10⁻³ · (5733 − 6.99·(M−W) − pₐ)
-           − 0.42  · ((M−W) − 58.15)
-           − 1.7×10⁻⁵ · M · (5867 − pₐ)
-           − 0.0014 · M · (34 − tₐ)
-           − 3.96×10⁻⁸ · fcl · ((tcl+273)⁴ − (tr+273)⁴)
-           − fcl · hc · (tcl − tₐ)
-```
-
-**Default parameters** for office occupants:
-
-| Parameter            | Value  | Notes                         |
-|----------------------|--------|-------------------------------|
-| M (metabolic rate)   | 1.2 met | Sedentary / light office work |
-| Icl (clothing)       | 1.0 clo | Winter; 0.5 clo in summer    |
-| v (air velocity)     | 0.1 m/s | Near-still indoor air        |
-| W (external work)    | 0       | No mechanical work           |
-
-Server room uses 1.6 met / 0.7 clo (active technician in workwear).
-
-**PMV scale:** −3 (cold) … 0 (neutral/comfortable) … +3 (hot).
-ASHRAE 55 / ISO 7730 acceptable range: **−0.5 ≤ PMV ≤ +0.5**.
-
-### Comfort Index (0–100 %)
+If all sensor readings were uploaded every minute with no filtering:
 
 ```
-ComfortIndex = max(0,  100 · (1 − |PMV|/3)^1.2)
+Raw rate = 9 sensors × 8 bytes (IEEE 754 double) = 72 B/min
+         = 4 320 B/hr  =  103 680 B/day  ≈  101 KB/day
 ```
 
-### Overall Building Comfort Score
+### Edge Approach: Alerts Only
+
+The edge node sends a payload only when anomalies are detected:
+
+| Scenario                | Transmission         | Bytes/min (avg) |
+|-------------------------|----------------------|-----------------|
+| No anomalies (idle)     | Nothing sent         | 0 B             |
+| Anomaly batch (1 alert) | ~180 B JSON          | ~180 B          |
+| Anomaly batch (3 alerts)| ~320 B JSON          | ~320 B          |
+
+With an estimated anomaly rate of **≤ 5 % of minutes** (3 min/hr):
 
 ```
-OverallComfort = ZoneComfortAvg × 0.80 + HumidityComfort × 0.20
+Edge avg rate  = 0.05 × 250 B/min  ≈  12.5 B/min
+Bandwidth saved = 1 − 12.5 / 72    ≈  83 %
 ```
 
-Where `ZoneComfortAvg` is area-weighted over **occupied** zones only, and `HumidityComfort` is 100 % within 30–60 % RH, penalised outside that range.
+In practice savings exceed **90 %** during normal building operation (nights/weekends with no anomalies produce zero cloud traffic). The `Edge_BandwidthSaving` item tracks this live using cumulative byte accounting.
 
-### Temperature Deviation
+### Alert Payload Format
 
+```json
+{
+  "node": "building-edge-01",
+  "ts": "2026-03-25T12:00:00.000Z",
+  "batch_id": 42,
+  "alert_count": 2,
+  "alerts": [
+    { "s": "Server Temp", "type": "THRESHOLD_WARN", "sev": "CRITICAL", "val": 32.5, "mean": 28.1, "z": 2.8 },
+    { "s": "Zone1 CO2",   "type": "ZSCORE",         "sev": "HIGH",     "val": 1850, "mean": 650, "z": 3.1 }
+  ]
+}
 ```
-TempDeviation = MeasuredTemp − HVACSetpoint  [°C]
-```
 
-Positive → above setpoint (too warm), negative → below setpoint (too cool).
+No raw sensor arrays are ever included. The payload contains only the anomaly classification, the triggering value, and the statistical context needed for cloud-side triage.
 
 ---
 
-## Energy Efficiency Metrics
+## Configuration
 
-### Energy Use Intensity (EUI)
+### Required OpenHAB Add-ons
 
-```
-EUI  [kWh/m²/yr] = TotalPower [W] / TotalArea [m²] × 8.76
-```
-
-This annualises the current instantaneous power over the total floor area.
-
-**Reference values for this building type:**
-
-| EUI range           | Classification        |
-|---------------------|-----------------------|
-| ≤ 150 kWh/m²/yr    | Excellent (target)    |
-| 150 – 220           | Good                  |
-| 220 – 300           | Average               |
-| > 300 kWh/m²/yr    | Poor                  |
-
-### Efficiency Score (0–100 %)
+Configured in `openhab/conf/services/addons.cfg`:
 
 ```
-Score = clamp(100 − (EUI − 100) / 3,  0,  100)
+automation = jsscripting
+binding = http
+persistence = rrd4j,mapdb
+transformation = map
+ui = basic
 ```
 
-Maps EUI = 100 → 100 %, EUI = 400 → 0 %.
+The **HTTP binding** is required for `cloud-alerts.js` to dispatch anomaly batches via `actions.HTTP.sendHttpPostRequest()`.
 
-### Efficiency Rating (A–E)
+### Cloud Endpoint
 
-| Score  | Rating |
-|--------|--------|
-| ≥ 85   | A      |
-| ≥ 70   | B      |
-| ≥ 55   | C      |
-| ≥ 40   | D      |
-| < 40   | E      |
+Set `CLOUD_ENDPOINT` in `cloud-alerts.js`:
 
-### Improvement Suggestions
-
-The system generates a single highest-priority suggestion each cycle:
-
-1. Server room share > 55 % → recommend server virtualisation
-2. HVAC share > 40 % → improve insulation / scheduling
-3. EUI > 350 → full energy audit
-4. EUI > 250 → LED upgrade + smarter HVAC
-5. HVAC active in unoccupied zone → scheduling error detected
-6. Within target → positive confirmation
-
----
-
-## Thermal Simulation Model
-
-Zone temperatures are governed by a differential model (per-minute step):
-
-```
-T_new = T_prev
-      + (T_outdoor − T_prev) × 0.008        (thermal drift toward outdoor)
-      + (T_setpoint − T_prev) × HVAC_rate   (HVAC correction)
-      + Occupancy × 0.04 °C/person           (body heat gain)
-      + noise(0.12 °C)
+```javascript
+var CLOUD_ENDPOINT = 'https://httpbin.org/post';  // development echo
 ```
 
-HVAC rates: HEAT = 0.15 / min, COOL = 0.12 / min, FAN = 0.02 / min.
-Effective thermal time constant ≈ 125 min (insulated commercial building).
+Replace with your production webhook or REST API endpoint.
 
-Humidity and CO2 follow analogous first-order models driven by occupancy and ventilation rate.
+### Detection Thresholds
 
----
+Tunable parameters in `anomaly-detection.js`:
 
-## Occupancy Analytics
+| Parameter        | Default | Description                                  |
+|------------------|---------|----------------------------------------------|
+| `Z_THRESHOLD`    | 2.5     | Standard deviations to flag Z-score anomaly  |
+| `IQR_MULTIPLIER` | 1.5     | Classic Tukey outlier fence multiplier        |
+| `EWMA_DEV_FACTOR`| 2.0     | Multiples of σ from EWMA to flag deviation   |
+| `MIN_SAMPLES`    | 10      | Minimum buffer size before statistical methods fire |
 
-Computed in `efficiency-calculations.js` on a rolling 60-minute buffer:
+### EWMA Smoothing
 
-| Metric              | Method                                               |
-|---------------------|------------------------------------------------------|
-| Peak occupancy      | Maximum count in rolling 60-min window              |
-| Peak time           | Timestamp of the peak sample                        |
-| 60-min prediction   | Time-pattern interpolation (Gaussian schedule)      |
-| Occupancy trend     | Rate of change (persons/hour) over last 15 samples  |
-| Active zones        | Count of zones with occupancy > 0                   |
-| Zone usage pattern  | Comma-separated label:count for occupied zones      |
+Configurable in `edge-analytics.js`:
 
----
+```javascript
+const EWMA_ALPHA = 0.1;  // α = 0.1 → effective memory span ≈ 9.5 min
+```
 
-## Repository File List
+### Alert Severity Mapping
 
-### Building Automation (Variant 4)
+The `anomaly-severity.map` transformation:
 
-| File | Purpose |
-|------|---------|
-| `openhab/conf/items/building.items` | 70+ items: sensors, HVAC, comfort, energy, occupancy |
-| `openhab/conf/automation/js/building-simulation.js` | Zone thermal model + occupancy schedule simulation |
-| `openhab/conf/automation/js/hvac-rules.js` | HVAC setpoint optimisation + power calculation |
-| `openhab/conf/automation/js/efficiency-calculations.js` | PMV · energy EUI · occupancy analytics |
-| `openhab/conf/sitemaps/building.sitemap` | Dashboard: 7 frames covering all metrics |
-| `openhab/conf/transform/hvac-mode.map` | HVAC mode human labels |
-| `openhab/conf/transform/comfort-level.map` | Comfort level human labels |
-| `openhab/conf/transform/occupancy-status.map` | Occupancy band human labels |
-| `openhab/conf/transform/efficiency-rating.map` | A–E rating human labels |
+```
+NONE=Normal
+THRESHOLD=Hard Limit Exceeded
+THRESHOLD_WARN=Near Limit
+ZSCORE=Z-Score Outlier
+IQR=IQR Outlier
+EWMA=EWMA Trend Deviation
+NULL=Unknown
+```
 
-### Infrastructure
+### Threading Considerations
 
-| File | Purpose |
-|------|---------|
-| `docker-compose.yaml` | OpenHAB 4.3 + Mosquitto MQTT |
-| `openhab/conf/persistence/rrd4j.persist` | Time-series history for charts |
-| `openhab/conf/persistence/mapdb.persist` | Item state restore on restart |
-| `openhab/conf/services/addons.cfg` | JSScripting, rrd4j, mapdb, MAP, BasicUI |
+All inter-script communication via `cache.shared` uses JSON string serialisation to prevent threading issues:
+
+```javascript
+// Writer (edge-aggregation.js): serialise stats as JSON string
+cache.shared.put('edge_stats_' + key, JSON.stringify(stats));
+
+// Reader (edge-analytics.js): parse JSON string back to object
+var stats = JSON.parse(cache.shared.get('edge_stats_' + key));
+
+// Alert queue (anomaly-detection.js → cloud-alerts.js)
+cache.shared.put('edge_alert_queue', JSON.stringify(alertQueue));
+var alerts = JSON.parse(cache.shared.get('edge_alert_queue'));
+```
 
 ---
 
 ## Dashboard Navigation
 
-The **building** sitemap contains seven frames:
+The **edge_analytics** sitemap contains seven frames:
 
-1. **Building Overview** – system status, total occupancy, power, comfort score, EUI, rating
-2. **Zone 1 · Office** – temperature, humidity, CO2, occupancy, HVAC state, PMV, comfort chart
-3. **Zone 2 · Conference** – same metrics for conference room
-4. **Zone 3 · Lobby** – same metrics for lobby
-5. **Zone 4 · Server Room** – temperature, HVAC cooling, server load
-6. **Comfort Analysis** – PMV per zone, building comfort score, humidity comfort, 24-h chart
-7. **Energy Efficiency Dashboard** – power breakdown, EUI, efficiency score/rating, suggestion, charts
-8. **Occupancy Analytics** – current / predicted / peak occupancy, zone pattern, trend, 24-h chart
-9. **HVAC System Summary** – per-zone mode, setpoint, HVAC power total
+1. **Edge Node Status** – buffer utilisation, compression ratio, bandwidth saving
+2. **Zone 1 · Office** – SMA-5/60, StdDev, EWMA, Z-score, anomaly status, Temp–CO2 correlation
+3. **Zone 2 · Conference** – same metrics
+4. **Zone 3 · Lobby** – same metrics
+5. **Zone 4 · Server Room** – same metrics (CRITICAL threshold for server temp ≥ 32 °C)
+6. **Building Power Analytics** – power SMA, StdDev, EWMA, Z-score, anomaly type
+7. **Cloud Communication** – alert status, severity, last message, bandwidth saving chart
 
+---
+
+## Repository File List
+
+### Edge Analytics Node (Variant 5)
+
+| File | Purpose |
+|------|---------|
+| `openhab/conf/items/edge-analytics.items` | 55+ items: buffer stats, anomaly types, cloud status |
+| `openhab/conf/automation/js/edge-aggregation.js` | Circular buffer management, SMA-5/60, StdDev computation |
+| `openhab/conf/automation/js/edge-analytics.js` | EWMA, Z-score, Pearson correlation |
+| `openhab/conf/automation/js/anomaly-detection.js` | Z-score · IQR · EWMA · threshold multi-method detection |
+| `openhab/conf/automation/js/cloud-alerts.js` | Batch HTTP POST alerts, bandwidth accounting |
+| `openhab/conf/sitemaps/edge_analytics.sitemap` | 7-frame edge analytics dashboard |
+| `openhab/conf/transform/anomaly-severity.map` | Anomaly type human labels |
+
+### Infrastructure
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yaml` | OpenHAB 4.3 + Mosquitto MQTT broker + MQTT simulator |
+| `openhab/conf/persistence/rrd4j.persist` | Time-series history for charts |
+| `openhab/conf/persistence/mapdb.persist` | Item state restore on restart |
+| `openhab/conf/services/addons.cfg` | JSScripting, HTTP binding, rrd4j, mapdb, MAP, BasicUI |
+| `openhab/conf/services/basicui.cfg` | Default sitemap configuration |
+| `openhab/conf/services/persistence.cfg` | Default persistence backend: rrd4j |
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Cannot retrieve item 'Zone1_Temperature'"** – Missing raw data items
+   - **Fix**: Ensure all Zone* and Bld_* items are defined in `edge-analytics.items`
+
+2. **"Failed transforming the value 'NULL'"** – Missing NULL handling in transformation
+   - **Fix**: Verify `NULL=Unknown` exists in `.map` transformation files
+
+3. **Cloud alerts not sending** – Missing HTTP binding
+   - **Fix**: Ensure `binding = http` is present in `addons.cfg`
+
+4. **"It is not recommended to store the JS object"** – Threading warning
+   - **Fix**: All cache operations now use JSON string serialisation
+
+### Validation
+
+After configuration changes, restart the OpenHAB container:
+
+```bash
+docker compose restart openhab
+```
+
+Monitor the logs for startup completion:
+
+```bash
+docker compose logs -f openhab | grep -i "edge\|anomaly\|cloud"
+```
+
+The system should show:
+- `Edge_LastAggregation` updating every minute
+- `Edge_Alert_Count` reflecting anomaly detections
+- `Edge_BandwidthSaving` showing bandwidth optimisation metrics

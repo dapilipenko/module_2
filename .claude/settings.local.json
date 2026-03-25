@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(find /d/Project/OpenHAB/module_2 -not -path */.git/* -not -path */node_modules/* -type d)"
-    ]
-  }
-}
