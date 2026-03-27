@@ -1,0 +1,42 @@
+Group gAirQuality "Air Quality"
+Group:Number gZonePM25 "PM2.5 by Zone"
+Group:Number gZonePM10 "PM10 by Zone"
+Group:Number gZoneCO2 "CO2 by Zone"
+Group:Number gZoneNO2 "NO2 by Zone"
+Group:String gZoneRisk "Risk by Zone"
+Group:Switch gZoneAlert "Alerts by Zone"
+
+Number CityAvgPM25 "City PM2.5 [%.1f ug/m3]" (gAirQuality) { channel="mqtt:topic:cityBroker:city:avgPm25" }
+Number CityAvgNO2 "City NO2 [%.1f ug/m3]" (gAirQuality) { channel="mqtt:topic:cityBroker:city:avgNo2" }
+String CityOverallRisk "Overall Risk [%s]" (gAirQuality) { channel="mqtt:topic:cityBroker:city:overallRisk" }
+String CityWorstZone "Worst Zone [%s]" (gAirQuality) { channel="mqtt:topic:cityBroker:city:worstZone" }
+Number CityActiveAlerts "Active Alerts [%d]" (gAirQuality) { channel="mqtt:topic:cityBroker:city:activeAlerts" }
+String CityAlertMessage "Alert Summary [%s]" (gAirQuality)
+
+Number ResidentialPM25 "Residential PM2.5 [%.1f ug/m3]" (gZonePM25) { channel="mqtt:topic:cityBroker:residential:pm25" }
+Number ResidentialPM10 "Residential PM10 [%.1f ug/m3]" (gZonePM10) { channel="mqtt:topic:cityBroker:residential:pm10" }
+Number ResidentialCO2 "Residential CO2 [%.1f ppm]" (gZoneCO2) { channel="mqtt:topic:cityBroker:residential:co2" }
+Number ResidentialNO2 "Residential NO2 [%.1f ug/m3]" (gZoneNO2) { channel="mqtt:topic:cityBroker:residential:no2" }
+String ResidentialRisk "Residential Risk [%s]" (gZoneRisk) { channel="mqtt:topic:cityBroker:residential:risk" }
+Switch ResidentialAlert "Residential Alert" (gZoneAlert) { channel="mqtt:topic:cityBroker:residential:alert" }
+
+Number IndustrialPM25 "Industrial PM2.5 [%.1f ug/m3]" (gZonePM25) { channel="mqtt:topic:cityBroker:industrial:pm25" }
+Number IndustrialPM10 "Industrial PM10 [%.1f ug/m3]" (gZonePM10) { channel="mqtt:topic:cityBroker:industrial:pm10" }
+Number IndustrialCO2 "Industrial CO2 [%.1f ppm]" (gZoneCO2) { channel="mqtt:topic:cityBroker:industrial:co2" }
+Number IndustrialNO2 "Industrial NO2 [%.1f ug/m3]" (gZoneNO2) { channel="mqtt:topic:cityBroker:industrial:no2" }
+String IndustrialRisk "Industrial Risk [%s]" (gZoneRisk) { channel="mqtt:topic:cityBroker:industrial:risk" }
+Switch IndustrialAlert "Industrial Alert" (gZoneAlert) { channel="mqtt:topic:cityBroker:industrial:alert" }
+
+Number ParkPM25 "Park PM2.5 [%.1f ug/m3]" (gZonePM25) { channel="mqtt:topic:cityBroker:park:pm25" }
+Number ParkPM10 "Park PM10 [%.1f ug/m3]" (gZonePM10) { channel="mqtt:topic:cityBroker:park:pm10" }
+Number ParkCO2 "Park CO2 [%.1f ppm]" (gZoneCO2) { channel="mqtt:topic:cityBroker:park:co2" }
+Number ParkNO2 "Park NO2 [%.1f ug/m3]" (gZoneNO2) { channel="mqtt:topic:cityBroker:park:no2" }
+String ParkRisk "Park Risk [%s]" (gZoneRisk) { channel="mqtt:topic:cityBroker:park:risk" }
+Switch ParkAlert "Park Alert" (gZoneAlert) { channel="mqtt:topic:cityBroker:park:alert" }
+
+Number TrafficPM25 "Traffic PM2.5 [%.1f ug/m3]" (gZonePM25) { channel="mqtt:topic:cityBroker:traffic:pm25" }
+Number TrafficPM10 "Traffic PM10 [%.1f ug/m3]" (gZonePM10) { channel="mqtt:topic:cityBroker:traffic:pm10" }
+Number TrafficCO2 "Traffic CO2 [%.1f ppm]" (gZoneCO2) { channel="mqtt:topic:cityBroker:traffic:co2" }
+Number TrafficNO2 "Traffic NO2 [%.1f ug/m3]" (gZoneNO2) { channel="mqtt:topic:cityBroker:traffic:no2" }
+String TrafficRisk "Traffic Risk [%s]" (gZoneRisk) { channel="mqtt:topic:cityBroker:traffic:risk" }
+Switch TrafficAlert "Traffic Alert" (gZoneAlert) { channel="mqtt:topic:cityBroker:traffic:alert" }

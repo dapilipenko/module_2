@@ -1,0 +1,121 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./deploy/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    restart: unless-stopped
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: air-quality-admin
+      DOCKER_INFLUXDB_INIT_ORG: air-quality
+      DOCKER_INFLUXDB_INIT_BUCKET: airquality
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: air-quality-token
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: air_quality_analytics
+      POSTGRES_USER: air_quality
+      POSTGRES_PASSWORD: air_quality
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/schema_postgresql.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./deploy/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./deploy/grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - influxdb
+      - postgres
+    restart: unless-stopped
+
+  ingestor:
+    build:
+      context: ./ingestor
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_TOPIC: airquality/+/+/measurements
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: air-quality
+      INFLUX_BUCKET: airquality
+      INFLUX_TOKEN: air-quality-token
+    depends_on:
+      - mosquitto
+      - influxdb
+    restart: unless-stopped
+
+  aggregator:
+    build:
+      context: ./aggregator
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_INPUT_TOPIC: airquality/+/+/measurements
+      MQTT_OUTPUT_PREFIX: openhab
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  openhab:
+    image: openhab/openhab:latest
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      USER_ID: "9001"
+      GROUP_ID: "9001"
+      CRYPTO_POLICY: unlimited
+      EXTRA_JAVA_OPTS: -Duser.timezone=Europe/Kiev
+    volumes:
+      - ./openhab/conf:/openhab/conf
+      - openhab-userdata:/openhab/userdata
+      - openhab-addons:/openhab/addons
+    depends_on:
+      - mosquitto
+      - aggregator
+    restart: unless-stopped
+
+  edge-simulator:
+    build:
+      context: ./simulator
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_TOPIC_PREFIX: airquality
+      SENSOR_COUNT: "52"
+      PUBLISH_INTERVAL_SEC: "15"
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:
+  postgres-data:
+  grafana-data:
+  openhab-userdata:
+  openhab-addons:

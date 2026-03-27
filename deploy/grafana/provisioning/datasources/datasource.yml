@@ -1,0 +1,28 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    uid: influxdb-airquality
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: air-quality
+      defaultBucket: airquality
+    secureJsonData:
+      token: air-quality-token
+
+  - name: PostgreSQL
+    uid: postgres-airquality
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: air_quality
+    secureJsonData:
+      password: air_quality
+    jsonData:
+      database: air_quality_analytics
+      sslmode: disable
+      postgresVersion: 1600

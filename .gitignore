@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+openhab/userdata/*
+!openhab/userdata/.gitkeep
+openhab/addons/*
+!openhab/addons/.gitkeep

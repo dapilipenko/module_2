@@ -1,0 +1,50 @@
+Bridge mqtt:broker:cityBroker "City MQTT Broker" [ host="mosquitto", port=1883, secure=false, clientID="openhab-airquality" ] {
+    Thing topic city "City Summary" @ "Monitoring" {
+        Channels:
+            Type number : avgPm25 "City PM2.5" [ stateTopic="openhab/city/summary", transformationPattern="JSONPATH:$.avg_pm25" ]
+            Type number : avgNo2 "City NO2" [ stateTopic="openhab/city/summary", transformationPattern="JSONPATH:$.avg_no2" ]
+            Type string : overallRisk "Overall Risk" [ stateTopic="openhab/city/summary", transformationPattern="JSONPATH:$.overall_risk" ]
+            Type string : worstZone "Worst Zone" [ stateTopic="openhab/city/summary", transformationPattern="JSONPATH:$.worst_zone" ]
+            Type number : activeAlerts "Active Alerts" [ stateTopic="openhab/city/summary", transformationPattern="JSONPATH:$.active_alerts" ]
+    }
+
+    Thing topic residential "Residential Zone" @ "Monitoring" {
+        Channels:
+            Type number : pm25 "Residential PM2.5" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.avg_pm25" ]
+            Type number : pm10 "Residential PM10" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.avg_pm10" ]
+            Type number : co2 "Residential CO2" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.avg_co2" ]
+            Type number : no2 "Residential NO2" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.avg_no2" ]
+            Type string : risk "Residential Risk" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.risk" ]
+            Type switch : alert "Residential Alert" [ stateTopic="openhab/zones/residential/state", transformationPattern="JSONPATH:$.alert_state", on="ON", off="OFF" ]
+    }
+
+    Thing topic industrial "Industrial Zone" @ "Monitoring" {
+        Channels:
+            Type number : pm25 "Industrial PM2.5" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.avg_pm25" ]
+            Type number : pm10 "Industrial PM10" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.avg_pm10" ]
+            Type number : co2 "Industrial CO2" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.avg_co2" ]
+            Type number : no2 "Industrial NO2" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.avg_no2" ]
+            Type string : risk "Industrial Risk" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.risk" ]
+            Type switch : alert "Industrial Alert" [ stateTopic="openhab/zones/industrial/state", transformationPattern="JSONPATH:$.alert_state", on="ON", off="OFF" ]
+    }
+
+    Thing topic park "Park Zone" @ "Monitoring" {
+        Channels:
+            Type number : pm25 "Park PM2.5" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.avg_pm25" ]
+            Type number : pm10 "Park PM10" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.avg_pm10" ]
+            Type number : co2 "Park CO2" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.avg_co2" ]
+            Type number : no2 "Park NO2" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.avg_no2" ]
+            Type string : risk "Park Risk" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.risk" ]
+            Type switch : alert "Park Alert" [ stateTopic="openhab/zones/park/state", transformationPattern="JSONPATH:$.alert_state", on="ON", off="OFF" ]
+    }
+
+    Thing topic traffic "Traffic Zone" @ "Monitoring" {
+        Channels:
+            Type number : pm25 "Traffic PM2.5" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.avg_pm25" ]
+            Type number : pm10 "Traffic PM10" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.avg_pm10" ]
+            Type number : co2 "Traffic CO2" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.avg_co2" ]
+            Type number : no2 "Traffic NO2" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.avg_no2" ]
+            Type string : risk "Traffic Risk" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.risk" ]
+            Type switch : alert "Traffic Alert" [ stateTopic="openhab/zones/traffic/state", transformationPattern="JSONPATH:$.alert_state", on="ON", off="OFF" ]
+    }
+}

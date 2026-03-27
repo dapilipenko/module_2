@@ -1,0 +1,24 @@
+rule "Update city alert summary"
+when
+    Member of gZoneAlert changed or
+    Item CityActiveAlerts changed or
+    Item CityWorstZone changed or
+    Item CityOverallRisk changed
+then
+    val activeAlerts = CityActiveAlerts.state.toString
+    if (activeAlerts != "0") {
+        CityAlertMessage.postUpdate("Active alerts: " + activeAlerts + ", worst zone: " + CityWorstZone.state.toString + ", risk: " + CityOverallRisk.state.toString)
+        logWarn("airquality", "Air quality alert detected in zone " + CityWorstZone.state.toString)
+    } else {
+        CityAlertMessage.postUpdate("No active pollution alerts")
+    }
+end
+
+rule "Log dangerous zone transitions"
+when
+    Member of gZoneRisk changed
+then
+    if (triggeringItem.state.toString == "dangerous") {
+        logWarn("airquality", "Dangerous pollution level detected for " + triggeringItem.name)
+    }
+end

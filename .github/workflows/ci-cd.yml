@@ -1,0 +1,96 @@
+name: ci-cd
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r simulator/requirements-dev.txt
+          pip install -r ingestor/requirements-dev.txt
+          pip install -r aggregator/requirements-dev.txt
+
+      - name: Lint
+        run: ruff check simulator/app ingestor/app aggregator/app
+
+      - name: Unit tests
+        run: |
+          python -m unittest discover -s simulator/tests -v
+          python -m unittest discover -s ingestor/tests -v
+          python -m unittest discover -s aggregator/tests -v
+
+      - name: Validate docker compose
+        run: docker compose config
+
+  build:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: lint-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push simulator image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./simulator
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/air-quality-simulator:latest
+
+      - name: Build and push ingestor image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ingestor
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/air-quality-ingestor:latest
+
+      - name: Build and push openHAB aggregator image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./aggregator
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/air-quality-openhab-aggregator:latest
+
+  deploy-staging:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd ${{ secrets.STAGING_PATH }}
+            docker compose pull
+            docker compose up -d

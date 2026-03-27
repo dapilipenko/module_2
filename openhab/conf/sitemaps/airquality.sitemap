@@ -1,0 +1,47 @@
+sitemap airquality label="City Air Quality Monitor"
+{
+    Frame label="City Summary" {
+        Text item=CityAvgPM25
+        Text item=CityAvgNO2
+        Text item=CityOverallRisk
+        Text item=CityWorstZone
+        Text item=CityActiveAlerts
+        Text item=CityAlertMessage
+    }
+
+    Frame label="Residential Zone" {
+        Text item=ResidentialPM25
+        Text item=ResidentialPM10
+        Text item=ResidentialCO2
+        Text item=ResidentialNO2
+        Text item=ResidentialRisk
+        Text item=ResidentialAlert
+    }
+
+    Frame label="Industrial Zone" {
+        Text item=IndustrialPM25
+        Text item=IndustrialPM10
+        Text item=IndustrialCO2
+        Text item=IndustrialNO2
+        Text item=IndustrialRisk
+        Text item=IndustrialAlert
+    }
+
+    Frame label="Park Zone" {
+        Text item=ParkPM25
+        Text item=ParkPM10
+        Text item=ParkCO2
+        Text item=ParkNO2
+        Text item=ParkRisk
+        Text item=ParkAlert
+    }
+
+    Frame label="Traffic Zone" {
+        Text item=TrafficPM25
+        Text item=TrafficPM10
+        Text item=TrafficCO2
+        Text item=TrafficNO2
+        Text item=TrafficRisk
+        Text item=TrafficAlert
+    }
+}
