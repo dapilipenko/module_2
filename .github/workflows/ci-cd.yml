@@ -63,21 +63,27 @@ jobs:
         with:
           context: ./simulator
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/air-quality-simulator:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/air-quality-simulator:latest
+            ghcr.io/${{ github.repository_owner }}/air-quality-simulator:${{ github.run_number }}
 
       - name: Build and push ingestor image
         uses: docker/build-push-action@v6
         with:
           context: ./ingestor
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/air-quality-ingestor:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/air-quality-ingestor:latest
+            ghcr.io/${{ github.repository_owner }}/air-quality-ingestor:${{ github.run_number }}
 
       - name: Build and push openHAB aggregator image
         uses: docker/build-push-action@v6
         with:
           context: ./aggregator
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/air-quality-openhab-aggregator:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/air-quality-openhab-aggregator:latest
+            ghcr.io/${{ github.repository_owner }}/air-quality-openhab-aggregator:${{ github.run_number }}
 
   deploy-staging:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
